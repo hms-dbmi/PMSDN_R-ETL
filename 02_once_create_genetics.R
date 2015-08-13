@@ -15,21 +15,78 @@ clinical[c(1,5,19:67)] %>%
   mutate(Test.Date = mdy(Test.Date)) %>%
   distinct -> Genetics
 
+# Correct variable names
+names(Genetics) <- gsub("/", ".", names(Genetics))
+
 # Correct test dates in the 20th century
 Genetics$Test.Date[which(Genetics$Test.Date > now())] <- Genetics$Test.Date[which(Genetics$Test.Date > now())] - years(100)
 
 # Sort by patient and date
 Genetics <- arrange(Genetics, Patient.ID, Test.Date)
 
-# Create empty new variables and reorder the columns
-Genetics <- mutate(Genetics, Result.type = "", Gain.Loss = "", Chr.Gene = "", Start = "", End = "")
-Genetics <- select(Genetics, 1, 3, 2, 13, 52:56, 5, 14:17, 37:40, 42:45, 47:50, 19:21, 36, 34, 35, everything())
+# Create new variables with defaults and reorder the columns
+Genetics <- mutate(Genetics,
+                   Result.type = "coordinates",
+                   Gain.Loss.1 = "Loss",
+                   Chr.Gene.1 = "22",
+                   Start.1 = Position.Start.Min,
+                   End.1 = Position.End.Min,
+                   Origin.1 = Participant.Origin,
+                   Gain.Loss.2 = Other.Gain.Loss.1,
+                   Chr.Gene.2 = Other.Arm.Gain.Loss.1,
+                   Start.2 = Other.Pos.Start.1,
+                   End.2 = Other.Pos.End.1,
+                   Origin.2 = Other.Origin.1,
+                   Gain.Loss.3 = Other.Gain.Loss.2,
+                   Chr.Gene.3 = Other.Arm.Gain.Loss.2,
+                   Start.3 = Other.Pos.Start.2,
+                   End.3 = Other.Pos.End.2,
+                   Origin.3 = Other.Origin.2,
+                   Gain.Loss.4 = Other.Gain.Loss.3,
+                   Chr.Gene.4 = Other.Arm.Gain.Loss.3,
+                   Start.4 = Other.Pos.Start.3,
+                   End.4 = Other.Pos.End.3,
+                   Origin.4 = Other.Origin.3)
+Genetics <- select(Genetics,
+                   Patient.ID,
+                   Test.Date,
+                   Genetic.Status,
+                   Comments,
+                   Std.Nomenclature,
+                   Position.Start.Max,
+                   Position.End.Max,
+                   Test.Method,
+                   Genome.Browser.Build,
+                   Result.type,
+                   Gain.Loss.1:Origin.1,
+                   Gain.Loss.2:Origin.2,
+                   Gain.Loss.3:Origin.3,
+                   Gain.Loss.4:Origin.4,
+                   Probe.1:Probe.3,
+                   Gene,
+                   Laboratory,
+                   Category,
+                   Test.Verification,
+                   Consultant.Verification,
+                   Karyotype.Start,
+                   Karyotype.End,
+                   Array.Version,
+                   Array.Confirmation.Studies,
+                   Start.Exon.Intron:Parental.Origin)
 
-# Insert empty lines to facilitate editing
-fill <- Genetics %>% select(Patient.ID) %>% distinct
-fill$Test.Date <- ymd("1900-01-01")
-Genetics <- full_join(Genetics,fill) %>% arrange(Patient.ID,Test.Date)
-Genetics[is.na(Genetics$Genetic.Status),1:2] <- NA
-rm(fill)
+# Delete non-informative test results
+Genetics <- filter(Genetics, Test.Method != "Karyotype" & Test.Method != "No result provided" & Test.Method != "" & Genetic.Status == "Results Verified" & (Genome.Browser.Build != "" | (Test.Method == "Sequence Analysis" | Test.Method == "Bi-Directional Sequence Analysis" | Test.Method == "Whole exome sequencing" )))
 
-write.csv(Genetics, "dataGenetics.csv")
+# Keep only the latest informative test results
+Genetics <- group_by(Genetics, Patient.ID) %>% filter(Test.Date == last(Test.Date)) %>% ungroup
+
+# Small corrections
+Genetics$Chr.Gene.2 <- gsub("[pq]$", "", Genetics$Chr.Gene.2)
+Genetics$Chr.Gene.3 <- gsub("[pq]$", "", Genetics$Chr.Gene.3)
+Genetics$Chr.Gene.4 <- gsub("[pq]$", "", Genetics$Chr.Gene.4)
+Genetics$Result.type[Genetics$Test.Method == "Bi-Directional Sequence Analysis" | Genetics$Test.Method == "Sequence Analysis" | Genetics$Test.Method == "Whole exome sequencing"] <- "mutation"
+
+# Select out irrelevant variables
+Genetics <- select(Genetics, -Genetic.Status)
+
+write.csv(Genetics, "dataGenetics.csv", na = "", row.names = F)
