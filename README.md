@@ -235,8 +235,8 @@ mutation | del | SHANK3 | 4576 | 4586 | de novo
 mutation | dup | SHANK3 | 3525 | 3527 | unknown
 mutation | >T | BRCA2 | 2134 | 2134 | unknown
 
-In the prepared *dataGenetics.csv* file, N=4 sets of these columns are present. If needed you can add as many sets, suffixing them with ascending numbers.--
-The genetic information automatically present in these columns should be reviewed for typos, errors and missing information. The genetic information can be looked for in the Comments, Std.Nomenclature, Position.Start.Max, Position.End.Max columns which can be used to validate and/or complete the information already available.--
+In the prepared *dataGenetics.csv* file, N=4 sets of these columns are present. If needed you can add as many sets, suffixing them with ascending numbers.  
+The genetic information automatically present in these columns should be reviewed for typos, errors and missing information. The genetic information can be looked for in the Comments, Std.Nomenclature, Position.Start.Max, Position.End.Max columns which can be used to validate and/or complete the information already available.  
 All the genetic information on one line should be expressed using the same human genome browser build. The online liftOver tool at http://genome.ucsc.edu/cgi-bin/hgLiftOver can be used to translate coordinates from one build to the other.  
 Mutations don't need a browser build.  
 For missing browser builds (Unknown), the browser can be inferred by looking at the test date and the coordinates ranges for the chromosomes in each build:
