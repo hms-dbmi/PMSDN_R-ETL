@@ -219,6 +219,7 @@ Cleaning the genetic results
 Step 2 extracts genetic information from the clinical file.  
 First, dates are harmonized to be compared, and variable names are cleaned.  
 Output variables are created and automatically populated as best as possible using the current curated fields, and reordered for ease of manual editing.  
+
 Non informative test results are censored (Karyotypes, too imprecise, "No result provided", and results without a human genome browser build). Also, only verified results by the genetic consultant are kept.  
 Of these relevant and reviewed informations, only the most up-to-date test result is kept.
 
@@ -237,7 +238,8 @@ mutation | >T | BRCA2 | 2134 | 2134 | unknown
 
 In the prepared *dataGenetics.csv* file, N=4 sets of these columns are present. If needed you can add as many sets, suffixing them with ascending numbers.  
 The genetic information automatically present in these columns should be reviewed for typos, errors and missing information. The genetic information can be looked for in the Comments, Std.Nomenclature, Position.Start.Max, Position.End.Max columns which can be used to validate and/or complete the information already available.  
-All the genetic information on one line should be expressed using the same human genome browser build. The online liftOver tool at http://genome.ucsc.edu/cgi-bin/hgLiftOver can be used to translate coordinates from one build to the other.  
+
+All the genetic information on one line should be expressed using the same human genome browser build. The [online liftOver tool](http://genome.ucsc.edu/cgi-bin/hgLiftOver) can be used to translate coordinates from one build to the other.  
 Mutations don't need a browser build.  
 For missing browser builds (Unknown), the browser can be inferred by looking at the test date and the coordinates ranges for the chromosomes in each build:
 
