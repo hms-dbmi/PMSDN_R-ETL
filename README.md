@@ -216,4 +216,36 @@ new_reformat_fn <- function(data, premap)
 Cleaning the genetic results
 ============================
 
+Step 2 extracts genetic information from the clinical file.  
+First, dates are harmonized to be compared, and variable names are cleaned.  
+Output variables are created and automatically populated as best as possible using the current curated fields, and reordered for ease of manual editing.  
+Non informative test results are censored (Karyotypes, too imprecise, "No result provided", and results without a human genome browser build). Also, only verified results by the genetic consultant are kept.  
+Of these relevant and reviewed informations, only the most up-to-date test result is kept.
 
+These first steps create the *dataGenetics.csv* file which is far from perfect and needs manual reviewing.  
+The file should contain only one line per patient, so if a patient appears on two lines (two reports on the same day), the information on the two lines must be merged and conflicts resolved. This can also work as a validation step for typos. (see patient 2541 for example).  
+The genetic information relevant for analyses must appear in the following columns:
+
+Result.type | Gain.Loss.N | Chr.Gene.N | Start.N | End.N | Origin.N
+----------- | ----------- | ---------- | ------- | ----- | --------
+The way all the N results are expressed | What is the defect | On which gene or chromosome is the defect | Start position | End position | Origin of the defect
+coordinates | Gain | 22 | 49123456 | 49691432 | de novo
+coordinates | Loss | 1 | 249123456 | 249250621 | maternally transmitted
+mutation | del | SHANK3 | 4576 | 4586 | de novo
+mutation | dup | SHANK3 | 3525 | 3527 | unknown
+mutation | >T | BRCA2 | 2134 | 2134 | unknown
+
+In the prepared *dataGenetics.csv* file, N=4 sets of these columns are present. If needed you can add as many sets, suffixing them with ascending numbers.
+The genetic information automatically present in these columns should be reviewed for typos, errors and missing information. The genetic information can be looked for in the Comments, Std.Nomenclature, Position.Start.Max, Position.End.Max columns which can be used to validate and/or complete the information already available.
+All the genetic information on one line should be expressed using the same human genome browser build. The online liftOver tool at http://genome.ucsc.edu/cgi-bin/hgLiftOver can be used to translate coordinates from one build to the other.  
+Mutations don't need a browser build.  
+For missing browser builds (Unknown), the browser can be inferred by looking at the test date and the coordinates ranges for the chromosomes in each build:
+
+Chromosome | hg17 | hg18 | hg19 | hg38
+---------- | ---- | ---- | ---- | ----
+17 | 78,774,742 | 78,774,742 | 81,195,210 | 83,257,441
+18 | 76,117,153 | 76,117,153 | 78,077,248 | 80,373,285
+22 | 49,554,710 | 49,691,432 | 51,304,566 | 50,818,468
+Year of release | 2004 | 2006 | 2009 | 2013
+
+When in doubt (or impossible to decide), hg18 is (at the time of writing) still the most widely used human assembly.
