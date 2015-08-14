@@ -27,23 +27,23 @@ Genetics <- arrange(Genetics, Patient.ID, Test.Date)
 # Create new variables with defaults and reorder the columns
 Genetics <- mutate(Genetics,
                    Result.type = "coordinates",
-                   Gain.Loss.1 = "Loss",
-                   Chr.Gene.1 = "22",
+                   Gain_Loss.1 = "Loss",
+                   Chr_Gene.1 = "22",
                    Start.1 = Position.Start.Min,
                    End.1 = Position.End.Min,
                    Origin.1 = Participant.Origin,
-                   Gain.Loss.2 = Other.Gain.Loss.1,
-                   Chr.Gene.2 = Other.Arm.Gain.Loss.1,
+                   Gain_Loss.2 = Other.Gain.Loss.1,
+                   Chr_Gene.2 = Other.Arm.Gain.Loss.1,
                    Start.2 = Other.Pos.Start.1,
                    End.2 = Other.Pos.End.1,
                    Origin.2 = Other.Origin.1,
-                   Gain.Loss.3 = Other.Gain.Loss.2,
-                   Chr.Gene.3 = Other.Arm.Gain.Loss.2,
+                   Gain_Loss.3 = Other.Gain.Loss.2,
+                   Chr_Gene.3 = Other.Arm.Gain.Loss.2,
                    Start.3 = Other.Pos.Start.2,
                    End.3 = Other.Pos.End.2,
                    Origin.3 = Other.Origin.2,
-                   Gain.Loss.4 = Other.Gain.Loss.3,
-                   Chr.Gene.4 = Other.Arm.Gain.Loss.3,
+                   Gain_Loss.4 = Other.Gain.Loss.3,
+                   Chr_Gene.4 = Other.Arm.Gain.Loss.3,
                    Start.4 = Other.Pos.Start.3,
                    End.4 = Other.Pos.End.3,
                    Origin.4 = Other.Origin.3)
@@ -58,11 +58,10 @@ Genetics <- select(Genetics,
                    Test.Method,
                    Genome.Browser.Build,
                    Result.type,
-                   Gain.Loss.1:Origin.1,
-                   Gain.Loss.2:Origin.2,
-                   Gain.Loss.3:Origin.3,
-                   Gain.Loss.4:Origin.4,
-                   Probe.1:Probe.3,
+                   Gain_Loss.1:Origin.1,
+                   Gain_Loss.2:Origin.2,
+                   Gain_Loss.3:Origin.3,
+                   Gain_Loss.4:Origin.4,
                    Gene,
                    Laboratory,
                    Category,
@@ -81,9 +80,9 @@ Genetics <- filter(Genetics, Test.Method != "Karyotype" & Test.Method != "No res
 Genetics <- group_by(Genetics, Patient.ID) %>% filter(Test.Date == last(Test.Date)) %>% ungroup
 
 # Small corrections
-Genetics$Chr.Gene.2 <- gsub("[pq]$", "", Genetics$Chr.Gene.2)
-Genetics$Chr.Gene.3 <- gsub("[pq]$", "", Genetics$Chr.Gene.3)
-Genetics$Chr.Gene.4 <- gsub("[pq]$", "", Genetics$Chr.Gene.4)
+Genetics$Chr_Gene.2 <- gsub("[pq]$", "", Genetics$Chr_Gene.2)
+Genetics$Chr_Gene.3 <- gsub("[pq]$", "", Genetics$Chr_Gene.3)
+Genetics$Chr_Gene.4 <- gsub("[pq]$", "", Genetics$Chr_Gene.4)
 Genetics$Result.type[Genetics$Test.Method == "Bi-Directional Sequence Analysis" | Genetics$Test.Method == "Sequence Analysis" | Genetics$Test.Method == "Whole exome sequencing"] <- "mutation"
 
 # Select out irrelevant variables
