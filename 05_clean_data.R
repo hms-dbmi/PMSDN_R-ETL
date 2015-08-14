@@ -14,3 +14,6 @@ processDemographics()
 processFile("Clinical")
 processFile("Adult")
 processFile("Developmental")
+
+# ==== Genetic information ====
+processGenetics()

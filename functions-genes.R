@@ -4,20 +4,21 @@ liftOver <- function(genetics)
 {
   # Create input bed files
   genetics <- add_rownames(genetics)
+  genetics$rowname <- as.numeric(genetics$rowname)
   genetics %>%
     filter(Genome.Browser.Build == "NCBI35/hg17") %>%
-    select(Chr.Gene, Start, End, rowname) %>%
-    mutate(Chr.Gene = paste0("chr", Chr.Gene)) -> bed17
+    select(Chr_Gene, Start, End, rowname) %>%
+    mutate(Chr_Gene = paste0("chr", Chr_Gene)) -> bed17
 
   genetics %>%
     filter(Genome.Browser.Build == "NCBI36/hg18") %>%
-    select(Chr.Gene, Start, End, rowname) %>%
-    mutate(Chr.Gene = paste0("chr", Chr.Gene)) -> bed18
+    select(Chr_Gene, Start, End, rowname) %>%
+    mutate(Chr_Gene = paste0("chr", Chr_Gene)) -> bed18
 
   genetics %>%
-    filter(Genome.Browser.Build == "GRCh37/hg19") %>%
-    select(Chr.Gene, Start, End, rowname) %>%
-    mutate(Chr.Gene = paste0("chr", Chr.Gene)) -> bed19
+    filter(Genome.Browser.Build == "NCBI37/hg19" | Genome.Browser.Build == "GRCh37/hg19") %>%
+    select(Chr_Gene, Start, End, rowname) %>%
+    mutate(Chr_Gene = paste0("chr", Chr_Gene)) -> bed19
 
   write.table(bed17, file = "bed17", sep = "\t", row.names = F, col.names = F, quote = F)
   write.table(bed18, file = "bed18", sep = "\t", row.names = F, col.names = F, quote = F)
@@ -33,10 +34,12 @@ liftOver <- function(genetics)
   out18 <- read.delim("out18",  header = F, stringsAsFactors = F)
   out19 <- read.delim("out19",  header = F, stringsAsFactors = F)
 
-  out17 <- filter(out17, V1 == paste0("chr",genetics$Chr.Gene[V4]))
-  out18 <- filter(out18, V1 == paste0("chr",genetics$Chr.Gene[V4]))
-  out19 <- filter(out19, V1 == paste0("chr",genetics$Chr.Gene[V4]))
+  # Read the liftOver results and keep only mapped regions on the original chromosome
+  out17 <- filter(out17, V1 == paste0("chr",genetics$Chr_Gene[V4]))
+  out18 <- filter(out18, V1 == paste0("chr",genetics$Chr_Gene[V4]))
+  out19 <- filter(out19, V1 == paste0("chr",genetics$Chr_Gene[V4]))
 
+  # Join together the overlapping regions on each chromosome
   data <- matrix(ncol = 4, nrow = 0)
   for (pat in unique(out17$V4))
   {
@@ -63,7 +66,6 @@ liftOver <- function(genetics)
       }
     }
   }
-
   for (pat in unique(out18$V4))
   {
     depth <- 0
@@ -89,7 +91,6 @@ liftOver <- function(genetics)
       }
     }
   }
-
   for (pat in unique(out19$V4))
   {
     depth <- 0
@@ -115,15 +116,16 @@ liftOver <- function(genetics)
       }
     }
   }
+
   data <- data.frame(data, stringsAsFactors = F)
-  names(data) <- c("rowname", "Chr.Gene", "Start", "End")
+  names(data) <- c("rowname", "Chr_Gene", "Start", "End")
   data$rowname <- as.numeric(data$rowname)
   data$Genome.Browser.Build <- "GRCh38/hg38"
   data$Result.type <- "coordinates"
-  data$Gain.Loss <- genetics$Gain.Loss[data$rowname]
+  data$Gain_Loss <- genetics$Gain_Loss[data$rowname]
   data$Patient.ID <- genetics$Patient.ID[data$rowname]
 
-  data <- select(data, rowname, Patient.ID, Genome.Browser.Build, Result.type, Gain.Loss, Chr.Gene, Start, End)
+  data <- select(data, rowname, Patient.ID, Genome.Browser.Build, Result.type, Gain_Loss, Chr_Gene, Start, End)
 
   genetics <- filter(genetics, !(rowname %in% data$rowname))
   genetics <- rbind(genetics, data)
@@ -147,7 +149,7 @@ getGenes <- function(genetics)
   for (row in 1:nrow(genetics))
   {
     if (genetics$Result.type[row] == "mutation" | genetics$Result.type[row] == "gene")
-      genes <- rbind(genes, data.frame(name = genetics$Chr.Gene[row], chrom = "", stringsAsFactors = F))
+      genes <- rbind(genes, data.frame(name = genetics$Chr_Gene[row], chrom = "", stringsAsFactors = F))
     else if (genetics$Result.type[row] == "coordinates")
     {
       if      (genetics$Genome.Browser.Build[row] == "GRCh37/hg19")
@@ -161,17 +163,17 @@ getGenes <- function(genetics)
       else
         genome <- hg18
 
-      if (genetics$Gain.Loss[row] == "Loss")
+      if (genetics$Gain_Loss[row] == "Loss")
       {
-        name <- genome$name2[((genome$txEnd > genetics$Start[row] & genome$txEnd < genetics$End[row]) | (genome$txStart > genetics$Start[row] & genome$txStart < genetics$End[row]) | (genome$txStart < genetics$Start[row] & genome$txEnd > genetics$End[row])) & genome$chrom == paste0("chr", genetics$Chr.Gene[row])]
+        name <- genome$name2[((genome$txEnd > genetics$Start[row] & genome$txEnd < genetics$End[row]) | (genome$txStart > genetics$Start[row] & genome$txStart < genetics$End[row]) | (genome$txStart < genetics$Start[row] & genome$txEnd > genetics$End[row])) & genome$chrom == paste0("chr", genetics$Chr_Gene[row])]
         if (length(name) > 0)
-          genes <- rbind(genes, data.frame(name, chrom = genetics$Chr.Gene[row], stringsAsFactors = F))
+          genes <- rbind(genes, data.frame(name, chrom = genetics$Chr_Gene[row], stringsAsFactors = F))
       }
       else
       {
-        name <- genome$name2[genome$txStart > genetics$Start[row] & genome$txEnd < genetics$End[row] & genome$chrom == paste0("chr", genetics$Chr.Gene[row])]
+        name <- genome$name2[genome$txStart > genetics$Start[row] & genome$txEnd < genetics$End[row] & genome$chrom == paste0("chr", genetics$Chr_Gene[row])]
         if (length(name) > 0)
-          genes <- rbind(genes, data.frame(name, chrom = genetics$Chr.Gene[row], stringsAsFactors = F))
+          genes <- rbind(genes, data.frame(name, chrom = genetics$Chr_Gene[row], stringsAsFactors = F))
       }
 
     }
@@ -195,25 +197,25 @@ extractGenes <- function(genetics_pre, genetics_post, bin)
   for (row in 1:nrow(genetics_pre))
   {
     patient <- genetics_pre$Patient.ID[row]
-    chr.gene <- genetics_pre$Chr.Gene[row]
+    Chr_Gene <- genetics_pre$Chr_Gene[row]
 
     if (genetics_pre$Result.type[row] == "mutation")
     {
       if (bin)
-        genetics_post[genetics_post$Patient.ID == patient, chr.gene] <- T
+        genetics_post[genetics_post$Patient.ID == patient, Chr_Gene] <- T
       else
-        genetics_post[genetics_post$Patient.ID == patient, chr.gene] <- genetics_post[genetics_post$Patient.ID == patient, chr.gene] - 1
+        genetics_post[genetics_post$Patient.ID == patient, Chr_Gene] <- genetics_post[genetics_post$Patient.ID == patient, Chr_Gene] - 1
     }
     else if (genetics_pre$Result.type[row] == "gene")
     {
       if (bin)
-        genetics_post[genetics_post$Patient.ID == patient, chr.gene] <- T
+        genetics_post[genetics_post$Patient.ID == patient, Chr_Gene] <- T
       else
       {
-        if (genetics_pre$Gain.Loss[row] == "Gain")
-          genetics_post[genetics_post$Patient.ID == patient, chr.gene] <- genetics_post[genetics_post$Patient.ID == patient, chr.gene] + 1
+        if (genetics_pre$Gain_Loss[row] == "Gain")
+          genetics_post[genetics_post$Patient.ID == patient, Chr_Gene] <- genetics_post[genetics_post$Patient.ID == patient, Chr_Gene] + 1
         else
-          genetics_post[genetics_post$Patient.ID == patient, chr.gene] <- genetics_post[genetics_post$Patient.ID == patient, chr.gene] - 1
+          genetics_post[genetics_post$Patient.ID == patient, Chr_Gene] <- genetics_post[genetics_post$Patient.ID == patient, Chr_Gene] - 1
       }
     }
     else if (genetics_pre$Result.type[row] == "coordinates")
@@ -229,9 +231,9 @@ extractGenes <- function(genetics_pre, genetics_post, bin)
       else
         genome <- hg18
 
-      if (genetics_pre$Gain.Loss[row] == "Loss")
+      if (genetics_pre$Gain_Loss[row] == "Loss")
       {
-        genes <- unique(genome$name2[((genome$txEnd > genetics_pre$Start[row] & genome$txEnd < genetics_pre$End[row]) | (genome$txStart > genetics_pre$Start[row] & genome$txStart < genetics_pre$End[row]) | (genome$txStart < genetics_pre$Start[row] & genome$txEnd > genetics_pre$End[row])) & genome$chrom == paste0("chr", chr.gene)])
+        genes <- unique(genome$name2[((genome$txEnd > genetics_pre$Start[row] & genome$txEnd < genetics_pre$End[row]) | (genome$txStart > genetics_pre$Start[row] & genome$txStart < genetics_pre$End[row]) | (genome$txStart < genetics_pre$Start[row] & genome$txEnd > genetics_pre$End[row])) & genome$chrom == paste0("chr", Chr_Gene)])
         if (bin)
           genetics_post[genetics_post$Patient.ID == patient, genes] <- T
         else
@@ -239,7 +241,7 @@ extractGenes <- function(genetics_pre, genetics_post, bin)
       }
       else
       {
-        genes <- unique(genome$name2[genome$txStart > genetics_pre$Start[row] & genome$txEnd < genetics_pre$End[row] & genome$chrom == paste0("chr", chr.gene)])
+        genes <- unique(genome$name2[genome$txStart > genetics_pre$Start[row] & genome$txEnd < genetics_pre$End[row] & genome$chrom == paste0("chr", Chr_Gene)])
         if (bin)
           genetics_post[genetics_post$Patient.ID == patient, genes] <- T
         else

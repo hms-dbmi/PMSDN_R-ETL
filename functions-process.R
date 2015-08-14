@@ -145,26 +145,64 @@ processDemographics <- function(noOutput = F)
     return(Demographics)
 }
 
+processGenetics <- function()
+{
+  ontology <<- push(ontology, "Genetic")
+
+  # Read the curated genetic data
+  Genetics <- read.csv("dataGenetics.csv", stringsAsFactors = F, na.strings = "")
+
+  # ==== "misc" genetic data ====
+  ontology <<- push(ontology, "Misc")
+    Genetics_misc <- select(Genetics,
+                            Patient.ID,
+                            Test.Date,
+                            Comments,
+                            Std.Nomenclature,
+                            Test.Method,
+                            Gene,
+                            Laboratory,
+                            Category,
+                            Test.Verification,
+                            Consultant.Verification,
+                            Karyotype.Start,
+                            Karyotype.End,
+                            Array.Version,
+                            Array.Confirmation.Studies,
+                            Parental.Results,
+                            Parental.Test.Method,
+                            Parental.Origin)
+    Genetics_misc$Comments <- gsub("[\n\t]", " ", Genetics_misc$Comments)
+    Genetics_misc$Std.Nomenclature <- gsub("[\n\t]", " ", Genetics_misc$Std.Nomenclature)
+
+    write.table(Genetics_misc, file = paste0("output/", "Genetics-Misc.txt"), row.names = F, sep = "\t", quote = F, na = "")
+    addMappings("Genetics", "Misc", ontology, Genetics_misc)
+  ontology <<- pop(ontology)
+
+  ontology <<- pop(ontology)
+}
+
 processRanges <- function(genetics)
 {
   hg38 <- read.delim("refGene.txt.hg38", stringsAsFactors = F)
 
-  genetics <- select(genetics, Patient.ID, Genome.Browser.Build, Result.type, Gain.Loss, Chr.Gene, Start, End)
+  # Prepare the data frame to contain only coordinates by transforming gene information and mutation information
+  genetics <- select(genetics, Patient.ID, Genome.Browser.Build, Result.type, Gain_Loss, Chr_Gene, Start, End)
   for (i in 1:nrow(genetics))
   {
     if (genetics$Result.type[i] == "gene")
     {
       genetics$Genome.Browser.Build[i] <- "GRCh38/hg38"
-      genetics$Start[i]                <-                hg38$txStart[hg38$name2 == genetics$Chr.Gene[i]][1]
-      genetics$End[i]                  <-                hg38$txEnd  [hg38$name2 == genetics$Chr.Gene[i]][1]
-      genetics$Chr.Gene[i]             <- sub("chr", "", hg38$chrom  [hg38$name2 == genetics$Chr.Gene[i]][1])
+      genetics$Start[i]                <-                hg38$txStart[hg38$name2 == genetics$Chr_Gene[i]][1]
+      genetics$End[i]                  <-                hg38$txEnd  [hg38$name2 == genetics$Chr_Gene[i]][1]
+      genetics$Chr_Gene[i]             <- sub("chr", "", hg38$chrom  [hg38$name2 == genetics$Chr_Gene[i]][1])
     }
     else if (genetics$Result.type[i] == "mutation")
     {
       genetics$Genome.Browser.Build[i] <- "GRCh38/hg38"
-      genetics$Start[i]                <- genetics$Start[i] + hg38$txStart[hg38$name2 == genetics$Chr.Gene[i]][1]
-      genetics$End[i]                  <- genetics$End[i]   + hg38$txStart[hg38$name2 == genetics$Chr.Gene[i]][1]
-      genetics$Chr.Gene[i]             <- sub("chr", "",      hg38$chrom  [hg38$name2 == genetics$Chr.Gene[i]][1])
+      genetics$Start[i]                <- genetics$Start[i] + hg38$txStart[hg38$name2 == genetics$Chr_Gene[i]][1]
+      genetics$End[i]                  <- genetics$End[i]   + hg38$txStart[hg38$name2 == genetics$Chr_Gene[i]][1]
+      genetics$Chr_Gene[i]             <- sub("chr", "",      hg38$chrom  [hg38$name2 == genetics$Chr_Gene[i]][1])
     }
   }
 
