@@ -100,18 +100,18 @@ The *04_opt_download_files.sh* script calls the *04_opt_download_files.R* R scri
 This downloads the following files:
 * **liftOver**
 	+ the liftOver tool itself
-	+ the hg17ToHg19.over.chain.gz mapping file from Human Genome Assembly Hg17 to Hg19
-	+ the hg18ToHg38.over.chain.gz mapping file from Human Genome Assembly Hg18 to Hg38
-	+ the hg19ToHg38.over.chain.gz mapping file from Human Genome Assembly Hg19 to Hg38
+	+ hg17ToHg19.over.chain.gz : mapping file from Human Genome Assembly Hg17 to Hg19
+	+ hg18ToHg38.over.chain.gz : mapping file from Human Genome Assembly Hg18 to Hg38
+	+ hg19ToHg38.over.chain.gz : mapping file from Human Genome Assembly Hg19 to Hg38
 * **RefGene**
-	+ refGene.txt.hg17 gene references for Human Genome Assembly Hg17
-	+ refGene.txt.hg18 gene references for Human Genome Assembly Hg18
-	+ refGene.txt.hg19 gene references for Human Genome Assembly Hg19
-	+ refGene.txt.hg38 gene references for Human Genome Assembly Hg38
+	+ refGene.txt.hg17 : gene references for Human Genome Assembly Hg17
+	+ refGene.txt.hg18 : gene references for Human Genome Assembly Hg18
+	+ refGene.txt.hg19 : gene references for Human Genome Assembly Hg19
+	+ refGene.txt.hg38 : gene references for Human Genome Assembly Hg38
 * **KEGG**
-	+ the KEGG_genes.txt KEGG Genes list
-	+ the KEGG_pathways.txt KEGG Pathways list
-	+ the KEGG_link_genes_pathways.txt KEGG relations between genes and pathways
+	+ KEGG_genes.txt : KEGG Genes list
+	+ KEGG_pathways.txt : KEGG Pathways list
+	+ KEGG_link_genes_pathways.txt : KEGG relations between genes and pathways
 
 The liftOver tool is used to convert chromosome coordinates to the latest Human Genome Assembly (GRCh38/hg38):  
 * hg17 -> hg19 -> hg38
@@ -245,6 +245,7 @@ For missing browser builds (Unknown), the browser can be inferred by looking at 
 
 Chromosome | hg17 | hg18 | hg19 | hg38
 ---------- | ---- | ---- | ---- | ----
+1 | 245,522,847 | 247,249,719 | 249,250,621 | 248,956,422
 17 | 78,774,742 | 78,774,742 | 81,195,210 | 83,257,441
 18 | 76,117,153 | 76,117,153 | 78,077,248 | 80,373,285
 22 | 49,554,710 | 49,691,432 | 51,304,566 | 50,818,468
