@@ -227,7 +227,7 @@ These first steps create the *dataGenetics.csv* file which is far from perfect a
 The file should contain only one line per patient, so if a patient appears on two lines (two reports on the same day), the information on the two lines must be merged and conflicts resolved. This can also work as a validation step for typos. (see patient 2541 for example).  
 The genetic information relevant for analyses must appear in the following columns:
 
-Result.type | Gain.Loss.N | Chr.Gene.N | Start.N | End.N | Origin.N
+Result.type | Gain_Loss.N | Chr_Gene.N | Start.N | End.N | Origin.N
 ----------- | ----------- | ---------- | ------- | ----- | --------
 The way all the N results are expressed | What is the defect | On which gene or chromosome is the defect | Start position | End position | Origin of the defect
 coordinates | Gain | 22 | 49123456 | 49691432 | de novo
