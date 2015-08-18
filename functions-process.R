@@ -130,7 +130,7 @@ processDemographics <- function(noOutput = F)
     write.table(Demographics, "output/Demographics.txt", row.names = F, sep = "\t", quote = F)
 
     # Write the mappings
-    ontology <- push(ontology, "Demographics")
+    ontology <<- push(ontology, "Demographics")
     addMapping("Demographics.txt", ontology, 1, "SUBJ_ID")
     addMapping("Demographics.txt", ontology, 2, "BIRTHDATE")
     addMapping("Demographics.txt", ontology, 3, "SEX")
@@ -138,7 +138,7 @@ processDemographics <- function(noOutput = F)
     addMapping("Demographics.txt", ontology, 5, "COUNTRY")
     addMapping("Demographics.txt", ontology, 6, "AGE_IN_YEARS")
     addMapping("Demographics.txt", ontology, 7, "AGE")
-    ontology <- pop(ontology)
+    ontology <<- pop(ontology)
   }
 
   if (noOutput)
