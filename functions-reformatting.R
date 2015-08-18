@@ -31,21 +31,21 @@ refactor <- function(data, premap)
   data2 <- select(data, Patient.ID, Survey.Date, Birthdate)
 
   # new vars prefix
-  varPre <- levels(factor(unlist(data[premap$Header[premap$Reformat == "refactor"]]), exclude = c("", "No")))
+  varPre <- levels(factor(unlist(data[premap$Header[premap$Reformat == "refactor"]]), exclude = c("")))
   # new vars suffix
   varSuff <- levels(factor(premap$VarName[premap$Linked != ""]))
   # Create new vars after transform
   for (pre in varPre)
     for (suff in varSuff)
-      data2[[paste(pre, suff, sep = "_")]] <- NA
+      data2[[paste(pre, suff, sep = "_")]] <- ""
 
-  #Effectively reformat the variable, keeping linked variables together
+  # Effectively reformat the variable, keeping linked variables together
   for (row in 1:nrow(data2))
   {
     for (link in levels(factor(premap$Linked, exclude = "")))
     {
       pre <- data[row, premap$Header[premap$Linked == link & premap$Reformat == "refactor"]]
-      if (pre == "" | pre == "No")
+      if (pre == "")
         next
       for (suff in varSuff)
       {
@@ -55,16 +55,54 @@ refactor <- function(data, premap)
         }
         else
         {
-          data2[row, paste(pre, suff, sep = "_")] <- data[row, premap$Header[premap$Linked == link & premap$VarName == suff]]
+          if (data[row, premap$Header[premap$Linked == link & premap$VarName == suff]] != "")
+            data2[row, paste(pre, suff, sep = "_")] <- data[row, premap$Header[premap$Linked == link & premap$VarName == suff]]
         }
       }
     }
   }
 
-  # Rename variables
+  # Unlist data (code above creates lists of length 1)
   for (varName in names(data2))
     data2[[varName]] <- unlist(data2[[varName]])
 
+  # Checkbox-like rules (see the checkbox function in this file) to handle missing values due to the registry functionning
+
+  ## Create helping columns
+  suff <- unique(premap$VarName[premap$Reformat == "refactor"])
+  colSpe  <- grep(paste0("^(Unsure|No)_", suff, "$"), names(data2))
+  colData <- grep(suff, names(data2))
+  colData <- setdiff(colData, colSpe)
+  sumSpe  <- apply(data2[colSpe],  1, function(x){sum(x == "Yes", na.rm = T)})
+  sumData <- apply(data2[colData], 1, function(x){sum(x == "Yes", na.rm = T)})
+
+  ## Only one special column checked
+  for (col in colSpe)
+    data2[data2[col] == "Yes", col] <- gsub("_.*$", "", names(data2[col]))
+
+  varSpe <- apply(data2[colSpe], 1, paste, collapse = "")
+  data2[sumSpe == 1 & sumData == 0, colData] <- varSpe[sumSpe == 1 & sumData == 0]
+
+  ## One special column checked and data
+  for (col in colSpe)
+    data2[data2[col] != "", col] <- paste(data2[data2[col] != "", col], "(by imputation)")
+
+  varSpe <- apply(data2[colSpe], 1, paste, collapse = "")
+  if (nrow(data2[sumSpe == 1 & sumData > 0, colData]) > 0)
+    data2[sumSpe == 1 & sumData > 0, colData] <- ifelse(data2[sumSpe == 1 & sumData > 0, colData] == "Yes", "Yes", varSpe[sumSpe == 1 & sumData > 0])
+
+  ## Normal case
+  for (col in colData)
+    data2[sumData > 0 & sumSpe == 0, col] <- ifelse(data2[sumData > 0 & sumSpe == 0, col] == "Yes", "Yes", "No (by imputation)")
+
+  ## Remove special columns
+  data2 <- select(data2, -matches("(Unsure|No)_"))
+
+  ## Fill accessory columns with N/A when No/Unsure
+  for (col in setdiff(varPre,c("No","Unsure")))
+    data2[grepl("No|Unsure", data2[[paste(col, suff, sep = "_")]]), paste(col, setdiff(varSuff, suff), sep = "_")] <- "Not applicable"
+
+  # Rename variables correctly
   varnames <- names(data2)
   varnames[-(1:3)] <- paste(premap$Head1[1], varnames[-(1:3)], sep = "_")
   varnames <- gsub("^_", "", varnames)
