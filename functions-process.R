@@ -152,7 +152,7 @@ processGenetics <- function()
   # Read the curated genetic data
   Genetics <- read.csv("dataGenetics.csv", stringsAsFactors = F, na.strings = "")
 
-  # ==== "misc" genetic data ====
+  # ==== "Misc" genetic data ====
   ontology <<- push(ontology, "Misc")
     Genetics_misc <- select(Genetics,
                             Patient.ID,
@@ -180,87 +180,4 @@ processGenetics <- function()
   ontology <<- pop(ontology)
 
   ontology <<- pop(ontology)
-}
-
-processRanges <- function(genetics)
-{
-  hg38 <- read.delim("refGene.txt.hg38", stringsAsFactors = F)
-
-  # Prepare the data frame to contain only coordinates by transforming gene information and mutation information
-  genetics <- select(genetics, Patient.ID, Genome.Browser.Build, Result.type, Gain_Loss, Chr_Gene, Start, End)
-  for (i in 1:nrow(genetics))
-  {
-    if (genetics$Result.type[i] == "gene")
-    {
-      genetics$Genome.Browser.Build[i] <- "GRCh38/hg38"
-      genetics$Start[i]                <-                hg38$txStart[hg38$name2 == genetics$Chr_Gene[i]][1]
-      genetics$End[i]                  <-                hg38$txEnd  [hg38$name2 == genetics$Chr_Gene[i]][1]
-      genetics$Chr_Gene[i]             <- sub("chr", "", hg38$chrom  [hg38$name2 == genetics$Chr_Gene[i]][1])
-    }
-    else if (genetics$Result.type[i] == "mutation")
-    {
-      genetics$Genome.Browser.Build[i] <- "GRCh38/hg38"
-      genetics$Start[i]                <- genetics$Start[i] + hg38$txStart[hg38$name2 == genetics$Chr_Gene[i]][1]
-      genetics$End[i]                  <- genetics$End[i]   + hg38$txStart[hg38$name2 == genetics$Chr_Gene[i]][1]
-      genetics$Chr_Gene[i]             <- sub("chr", "",      hg38$chrom  [hg38$name2 == genetics$Chr_Gene[i]][1])
-    }
-  }
-
-  liftOver(genetics)
-}
-
-processGenes <- function(genetics, bin = F)
-{
-  # Get a list of all involved genes
-  genes <- getGenes(genetics)
-
-  # Create the data frame to hold the annotated genetic data
-  Genetics_genes <- data_frame(Patient.ID = unique(genetics$Patient.ID))
-  Demographics <- processDemographics(noOutput = T)
-  Demographics$Patient.ID <- as.numeric(Demographics$Patient.ID)
-  Genetics_genes <- left_join(Genetics_genes, Demographics[c("Patient.ID", "Gender")])
-  for (gene in genes$name)
-  {
-    if (bin)
-    {
-      if (genes$chrom[genes$name == gene] == "Y")
-      {
-        Genetics_genes[[gene]][Genetics_genes$Gender == "Male"]   <- F
-        Genetics_genes[[gene]][Genetics_genes$Gender == "Female"] <- NA
-      }
-      else
-        Genetics_genes[[gene]] <- F
-    }
-    else
-    {
-      if (genes$chrom[genes$name == gene] == "Y")
-      {
-        Genetics_genes[[gene]][Genetics_genes$Gender == "Male"]   <- 1
-        Genetics_genes[[gene]][Genetics_genes$Gender == "Female"] <- 0
-      }
-      else if (genes$chrom[genes$name == gene] == "X")
-      {
-        Genetics_genes[[gene]][Genetics_genes$Gender == "Male"]   <- 1
-        Genetics_genes[[gene]][Genetics_genes$Gender == "Female"] <- 2
-      }
-      else
-        Genetics_genes[[gene]] <- 2
-    }
-  }
-
-  # Extract the information from the raw genetic test reports into the data frame
-  extractGenes(genetics, Genetics_genes, bin)
-}
-
-processPathways <- function(genetics, genetics_genes)
-{
-  # Enrich genes with pathways annotation
-  genes <- getGenes(genetics)
-  genes <- getPathways(genes)
-
-  # Create the data frame to hold the annotated genetic data
-  Genetics_pathways <- data.frame(Patient.ID = unique(genetics$Patient.ID))
-  Genetics_pathways[unique(sort(genes$pathway))] <- 0
-
-  extractPathways(genetics_genes, genes, Genetics_pathways)
 }
