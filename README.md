@@ -251,4 +251,4 @@ Chromosome | hg17 | hg18 | hg19 | hg38
 22 | 49,554,710 | 49,691,432 | 51,304,566 | 50,818,468
 Year of release | 2004 | 2006 | 2009 | 2013
 
-When in doubt (or impossible to decide), hg18 is (at the time of writing) still the most widely used human assembly.
+When in doubt (or impossible to decide), even if hg18 is (at the time of writing) still the most widely used human assembly, leave it as unknown as it is impossible to correctly infer the genome assembly and could lead to misinterpretation.
