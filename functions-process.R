@@ -178,6 +178,36 @@ processGenetics <- function()
     write.table(Genetics_misc, file = paste0("output/", "Genetics-Misc.txt"), row.names = F, sep = "\t", quote = F, na = "")
     addMappings("Genetics", "Misc", ontology, Genetics_misc)
   ontology <<- pop(ontology)
+  
+  # ==== "Alterations" genetic data ====
+  ontology <<- push(ontology, "Chromosomal alterations")
+  # Reshape the data frame to prepare it for the coordinates conversion
+  varying = grep("\\d$", names(Genetics), value = T)
+  Genetics <- reshape(Genetics, direction = "long", varying = varying, sep = ".", idvar = "Patient.ID", timevar = "Test.nb") %>%
+    arrange(Patient.ID, Test.nb) %>%
+    filter(!is.na(Gain_Loss))
+  
+  Genetics_ranges   <- processRanges(Genetics)
+  
+  # Keep only GRCh38/hg38 deletion ranges
+  Genetics_ranges <- filter(Genetics_ranges, Genome.Browser.Build == "GRCh38/hg38") %>% select(-Genome.Browser.Build)
+  Genetics_ranges <- group_by(Genetics_ranges, Patient.ID, Chr_Gene) %>% mutate(N = row_number()) %>% ungroup() %>% ungroup()
+  
+  data2 <- distinct(Genetics_ranges[c("Patient.ID", "Result.type")])
+  for (chr in unique(Genetics_ranges$Chr_Gene))
+  {
+    ranges <- filter(Genetics_ranges, Chr_Gene == chr) %>% select(-Chr_Gene, -Result.type)
+    for (n in unique(ranges$N))
+    {
+      ranges2 <- filter(ranges, N == n)
+      names(ranges2) <- c("Patient.ID", paste0("Chr", chr, "_", n,"_",c("Gain/Loss","Start","End")), "N")
+      data2 <- merge(data2, select(ranges2, -N), by = "Patient.ID", all = T)
+    }
+  }
+  
+  write.table(data2, file = paste0("output/","Genetics-Ranges.txt"), row.names = F, sep = "\t", quote = F, na = "")
+  addMappings("Genetics","Ranges",ontology,data2)
+  ontology <<- pop(ontology)
 
   ontology <<- pop(ontology)
 }
