@@ -26,9 +26,9 @@ They must first be renamed as following:
 * dataAdult.xls for the Adolescent and Adults Questionnaire
 
 and placed in the scripts folder.
-The scripts need the dplyr and tidyr R packages that you can install with this command:
+The scripts need the dplyr, tidyr and lubridate R packages that you can install with this command:
 ```R
-install.packages(c("dplyr","tidyr"))
+install.packages(c("dplyr","tidyr","lubridate"))
 ```
 
 Step 1
