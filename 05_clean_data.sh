@@ -1,2 +1,2 @@
 #!/bin/bash
-R < 05_clean_phenotypic_data.R --vanilla
+R < 05_clean_data.R --vanilla
