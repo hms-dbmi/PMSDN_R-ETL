@@ -2,8 +2,7 @@ require("dplyr")
 
 processRanges <- function(genetics)
 {
-  hg38 <- read.delim("refGene.txt.hg38", stringsAsFactors = F)
-  
+  hg38 <- read.delim("refGene.txt.hg38", stringsAsFactors = F, header = F, col.names = c("bin", "name", "chrom", "strand", "txStart", "txEnd", "cdsStart", "cdsEnd", "exonCount", "exonStarts", "exonEnds", "score", "name2", "cdsStartStat", "cdsEndStat", "exonFrames"))
   # Prepare the data frame to contain only coordinates by transforming gene information and mutation information
   genetics <- select(genetics, Patient.ID, Genome.Browser.Build, Result.type, Gain_Loss, Chr_Gene, Start, End)
   for (i in 1:nrow(genetics))
@@ -11,15 +10,15 @@ processRanges <- function(genetics)
     if (genetics$Result.type[i] == "gene")
     {
       genetics$Genome.Browser.Build[i] <- "GRCh38/hg38"
-      genetics$Start[i]                <-                hg38$txStart[hg38$name2 == genetics$Chr_Gene[i]][1]
-      genetics$End[i]                  <-                hg38$txEnd  [hg38$name2 == genetics$Chr_Gene[i]][1]
+      genetics$Start[i]                <-     as.numeric(hg38$txStart[hg38$name2 == genetics$Chr_Gene[i]][1])
+      genetics$End[i]                  <-     as.numeric(hg38$txEnd  [hg38$name2 == genetics$Chr_Gene[i]][1])
       genetics$Chr_Gene[i]             <- sub("chr", "", hg38$chrom  [hg38$name2 == genetics$Chr_Gene[i]][1])
     }
     else if (genetics$Result.type[i] == "mutation")
     {
       genetics$Genome.Browser.Build[i] <- "GRCh38/hg38"
-      genetics$Start[i]                <- genetics$Start[i] + hg38$txStart[hg38$name2 == genetics$Chr_Gene[i]][1]
-      genetics$End[i]                  <- genetics$End[i]   + hg38$txStart[hg38$name2 == genetics$Chr_Gene[i]][1]
+      genetics$Start[i]                <- genetics$Start[i] + as.numeric(hg38$txStart[hg38$name2 == genetics$Chr_Gene[i]][1])
+      genetics$End[i]                  <- genetics$End[i]   + as.numeric(hg38$txStart[hg38$name2 == genetics$Chr_Gene[i]][1])
       genetics$Chr_Gene[i]             <- sub("chr", "",      hg38$chrom  [hg38$name2 == genetics$Chr_Gene[i]][1])
     }
   }
@@ -222,10 +221,10 @@ liftOver <- function(genetics)
 getGenes <- function(genetics)
 {
   # Read refGene position tables for all genome assemblies
-  hg17 <- read.delim("refGene.txt.hg17", stringsAsFactors = F)
-  hg18 <- read.delim("refGene.txt.hg18", stringsAsFactors = F)
-  hg19 <- read.delim("refGene.txt.hg19", stringsAsFactors = F)
-  hg38 <- read.delim("refGene.txt.hg38", stringsAsFactors = F)
+  hg17 <- read.delim("refGene.txt.hg17", stringsAsFactors = F, header = F, col.names = c("bin", "name", "chrom", "strand", "txStart", "txEnd", "cdsStart", "cdsEnd", "exonCount", "exonStarts", "exonEnds", "score", "name2", "cdsStartStat", "cdsEndStat", "exonFrames"))
+  hg18 <- read.delim("refGene.txt.hg18", stringsAsFactors = F, header = F, col.names = c("bin", "name", "chrom", "strand", "txStart", "txEnd", "cdsStart", "cdsEnd", "exonCount", "exonStarts", "exonEnds", "score", "name2", "cdsStartStat", "cdsEndStat", "exonFrames"))
+  hg19 <- read.delim("refGene.txt.hg19", stringsAsFactors = F, header = F, col.names = c("bin", "name", "chrom", "strand", "txStart", "txEnd", "cdsStart", "cdsEnd", "exonCount", "exonStarts", "exonEnds", "score", "name2", "cdsStartStat", "cdsEndStat", "exonFrames"))
+  hg38 <- read.delim("refGene.txt.hg38", stringsAsFactors = F, header = F, col.names = c("bin", "name", "chrom", "strand", "txStart", "txEnd", "cdsStart", "cdsEnd", "exonCount", "exonStarts", "exonEnds", "score", "name2", "cdsStartStat", "cdsEndStat", "exonFrames"))
 
   genes <- data.frame(name = character(0), chrom = character(0))
 
@@ -248,13 +247,13 @@ getGenes <- function(genetics)
 
       if (genetics$Gain_Loss[row] == "Loss")
       {
-        name <- genome$name2[((genome$txEnd > genetics$Start[row] & genome$txEnd < genetics$End[row]) | (genome$txStart > genetics$Start[row] & genome$txStart < genetics$End[row]) | (genome$txStart < genetics$Start[row] & genome$txEnd > genetics$End[row])) & genome$chrom == paste0("chr", genetics$Chr_Gene[row])]
+        name <- genome$name2[((as.numeric(genome$txEnd) > genetics$Start[row] & as.numeric(genome$txEnd) < genetics$End[row]) | (as.numeric(genome$txStart) > genetics$Start[row] & as.numeric(genome$txStart) < genetics$End[row]) | (as.numeric(genome$txStart) < genetics$Start[row] & as.numeric(genome$txEnd) > genetics$End[row])) & genome$chrom == paste0("chr", genetics$Chr_Gene[row])]
         if (length(name) > 0)
           genes <- rbind(genes, data.frame(name, chrom = genetics$Chr_Gene[row], stringsAsFactors = F))
       }
       else
       {
-        name <- genome$name2[genome$txStart > genetics$Start[row] & genome$txEnd < genetics$End[row] & genome$chrom == paste0("chr", genetics$Chr_Gene[row])]
+        name <- genome$name2[as.numeric(genome$txStart) > genetics$Start[row] & as.numeric(genome$txEnd) < genetics$End[row] & genome$chrom == paste0("chr", genetics$Chr_Gene[row])]
         if (length(name) > 0)
           genes <- rbind(genes, data.frame(name, chrom = genetics$Chr_Gene[row], stringsAsFactors = F))
       }
@@ -272,10 +271,10 @@ getGenes <- function(genetics)
 extractGenes <- function(genetics_pre, genetics_post, bin)
 {
   # Read refGene position tables for all genome assemblies
-  hg17 <- read.delim("refGene.txt.hg17", stringsAsFactors = F)
-  hg18 <- read.delim("refGene.txt.hg18", stringsAsFactors = F)
-  hg19 <- read.delim("refGene.txt.hg19", stringsAsFactors = F)
-  hg38 <- read.delim("refGene.txt.hg38", stringsAsFactors = F)
+  hg17 <- read.delim("refGene.txt.hg17", stringsAsFactors = F, header = F, col.names = c("bin", "name", "chrom", "strand", "txStart", "txEnd", "cdsStart", "cdsEnd", "exonCount", "exonStarts", "exonEnds", "score", "name2", "cdsStartStat", "cdsEndStat", "exonFrames"))
+  hg18 <- read.delim("refGene.txt.hg18", stringsAsFactors = F, header = F, col.names = c("bin", "name", "chrom", "strand", "txStart", "txEnd", "cdsStart", "cdsEnd", "exonCount", "exonStarts", "exonEnds", "score", "name2", "cdsStartStat", "cdsEndStat", "exonFrames"))
+  hg19 <- read.delim("refGene.txt.hg19", stringsAsFactors = F, header = F, col.names = c("bin", "name", "chrom", "strand", "txStart", "txEnd", "cdsStart", "cdsEnd", "exonCount", "exonStarts", "exonEnds", "score", "name2", "cdsStartStat", "cdsEndStat", "exonFrames"))
+  hg38 <- read.delim("refGene.txt.hg38", stringsAsFactors = F, header = F, col.names = c("bin", "name", "chrom", "strand", "txStart", "txEnd", "cdsStart", "cdsEnd", "exonCount", "exonStarts", "exonEnds", "score", "name2", "cdsStartStat", "cdsEndStat", "exonFrames"))
 
   for (row in 1:nrow(genetics_pre))
   {
@@ -316,7 +315,7 @@ extractGenes <- function(genetics_pre, genetics_post, bin)
 
       if (genetics_pre$Gain_Loss[row] == "Loss")
       {
-        genes <- unique(genome$name2[((genome$txEnd > genetics_pre$Start[row] & genome$txEnd < genetics_pre$End[row]) | (genome$txStart > genetics_pre$Start[row] & genome$txStart < genetics_pre$End[row]) | (genome$txStart < genetics_pre$Start[row] & genome$txEnd > genetics_pre$End[row])) & genome$chrom == paste0("chr", Chr_Gene)])
+        genes <- unique(genome$name2[((as.numeric(genome$txEnd) > genetics_pre$Start[row] & as.numeric(genome$txEnd) < genetics_pre$End[row]) | (as.numeric(genome$txStart) > genetics_pre$Start[row] & as.numeric(genome$txStart) < genetics_pre$End[row]) | (as.numeric(genome$txStart) < genetics_pre$Start[row] & as.numeric(genome$txEnd) > genetics_pre$End[row])) & genome$chrom == paste0("chr", Chr_Gene)])
         if (bin)
           genetics_post[genetics_post$Patient.ID == patient, genes] <- T
         else
@@ -324,7 +323,7 @@ extractGenes <- function(genetics_pre, genetics_post, bin)
       }
       else
       {
-        genes <- unique(genome$name2[genome$txStart > genetics_pre$Start[row] & genome$txEnd < genetics_pre$End[row] & genome$chrom == paste0("chr", Chr_Gene)])
+        genes <- unique(genome$name2[as.numeric(genome$txStart) > genetics_pre$Start[row] & as.numeric(genome$txEnd) < genetics_pre$End[row] & genome$chrom == paste0("chr", Chr_Gene)])
         if (bin)
           genetics_post[genetics_post$Patient.ID == patient, genes] <- T
         else
