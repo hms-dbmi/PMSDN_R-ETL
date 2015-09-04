@@ -66,7 +66,7 @@ catClean <- function(header1, header2)
 # Clean the first header
 cleanHeader1 <- function(header1)
 {
-  header1 <- gsub(" +\\(.*?\\)",                                                                                  "", header1, perl = T)
+  header1 <- gsub(" +\\(.*?\\)",                                                                                 "", header1, perl = T)
   header1 <- gsub("Please (enter|select) either pounds( and ounces)? or kilograms\\.",                           "", header1, perl = T)
   header1 <- gsub("Please enter either feet and inches or centimeters\\.",                                       "", header1, perl = T)
   header1 <- gsub("Please answer the following questions\\.",                                                    "", header1, perl = T)

@@ -44,9 +44,19 @@ html2csv <- function(filename)
 
   # Replace &reg; with ®
   html <- gsub('&reg;',                                            '®',   html)
+  
+  # Replace no-break spaces with normal spaces
+  html <- gsub(' ',                                               ' ', html)
 
+  # Get rid of multiple spaces
+  html <- gsub(' +',                                     ' ',   html)
+  
+  # Get rid of trailing whitespaces
+  html <- gsub(' +\\|',                                    '|',   html)
+  html <- gsub('\\| +',                                            '|',   html)
+  
   # Delete empty fields
-  html <- gsub("\\|\\|",                                                "",   html)
+  html <- gsub("\\|\\|",                                           "",   html)
 
   # Write final csv file
   cat(html,file = paste0(filename, ".csv"))
