@@ -97,6 +97,10 @@ processHead1 <- function(head1, data, premap)
     data <- evolutive(data)
   else
     data <- historical(data)
+  
+  # Clean the content of tabs and linefeeds
+  for (var in names(data))
+    data[var] <- gsub("[\n\t]", " ", data[[var]])
 
   data
 }
