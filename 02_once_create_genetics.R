@@ -5,7 +5,7 @@ library(magrittr)
 # Extract the genetic test results fields from the clinical file, only where there are results
 # Parse the dates
 clinical <- read.csv.2header("dataClinical.csv")
-clinical[c(1,5,19:67)] %>%
+clinical[c(1,5,22:70)] %>%
   filter(Genetic.Status != "No Results Received") %>%
   mutate(Test.Date = gsub("/", "-",                      Test.Date, perl = T)) %>%
   mutate(Test.Date = gsub("^(\\d)-", "0\\1-",            Test.Date, perl = T)) %>%
