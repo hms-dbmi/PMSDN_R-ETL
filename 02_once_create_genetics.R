@@ -1,5 +1,6 @@
 source("functions-loading.R")
 require(lubridate)
+library(magrittr)
 
 # Extract the genetic test results fields from the clinical file, only where there are results
 # Parse the dates
@@ -87,5 +88,8 @@ Genetics$Result.type[Genetics$Test.Method == "Bi-Directional Sequence Analysis" 
 
 # Select out irrelevant variables
 Genetics <- select(Genetics, -Genetic.Status)
+
+Genetics %<>%
+  mutate(Test.Date = format(Genetics$Test.Date, format = "%m/%d/%y %I:%M %p"))
 
 write.csv(Genetics, "dataGenetics.csv", na = "", row.names = F)
