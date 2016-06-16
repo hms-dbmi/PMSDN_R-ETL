@@ -43,6 +43,7 @@ processFile <- function(questionnaire, noOutput = F)
 # Process at the SubFile level
 processSubfile <- function(questionnaire, subfile, data, premap, noOutput)
 {
+tryCatch({
   print(paste("Starting subfile", subfile))
   # Add the SubFile level to the ontology
   if (!noOutput)
@@ -71,6 +72,9 @@ processSubfile <- function(questionnaire, subfile, data, premap, noOutput)
   print(paste("Finishing subfile", subfile))
 
   data2
+  },
+  error = function(e) print(e)
+  )
 }
 
 # Process at the Head1 level
