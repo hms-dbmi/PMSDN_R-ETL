@@ -27,10 +27,12 @@ processFile <- function(questionnaire, noOutput = F)
 
   # Process each SubFile level (excluding the empty SubFile level->Demographics)
   for (subfile in levels(factor(premap$SubFile, exclude = "")))
-      data2 <- merge(data2, processSubfile(questionnaire, subfile, data, premap, noOutput = noOutput), by = "Patient.ID")
-
-      print("Finished subfile")
-
+      data2 <- tryCatch({merge(data2, processSubfile(questionnaire, subfile, data, premap, noOutput = noOutput), by = "Patient.ID")
+        },
+        error = function(e){
+          dump(data2, file=paste0(subfile,"dump.asc"))
+        }
+  )
   if (!noOutput)
     ontology <<- pop(ontology)
 
