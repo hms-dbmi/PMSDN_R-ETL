@@ -13,15 +13,13 @@ processFile <- function(questionnaire, noOutput = F)
   # Read the data and premapping files
   print(paste("processing data for ", questionnaire))
   data <- tryCatch({read.csv.2header(paste0("data", questionnaire, ".csv"))}, 
-    error = function(e) { print(paste("error reading csv to data: ", e))},
-    finally = {print("Finished parsing data")}
+    error = function(e) { print(paste("error reading csv to data: ", e))}
     )
   data <- data[data$Survey.Session.ID != "", ]
 
   print(paste("processing premap for ", questionnaire))
   premap <- tryCatch({read.csv(paste0("premap", questionnaire, ".csv"), stringsAsFactors = F, colClasses = "character")}, 
-    error = function(e) {print(paste("error reading csv to premap: ", e))},
-    finally = {print("Finished premap")}
+    error = function(e) {print(paste("error reading csv to premap: ", e))}
     )
   premap$ColNum <- as.integer(premap$ColNum)
 
@@ -31,8 +29,7 @@ processFile <- function(questionnaire, noOutput = F)
   for (subfile in levels(factor(premap$SubFile, exclude = "")))
     print(paste("Processing ", subfile))
     data2 <- tryCatch({merge(data2, processSubfile(questionnaire, subfile, data, premap, noOutput = noOutput), by = "Patient.ID")}, 
-      error = function(e) {print(paste("error merging subfiles level: ", subfile, e))},
-      finally = {print("Finished subfile")}
+      error = function(e) {print(paste("error merging subfiles level: ", subfile, e))}
     )
 
   if (!noOutput)
