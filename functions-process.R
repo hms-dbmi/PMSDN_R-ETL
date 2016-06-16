@@ -41,7 +41,7 @@ processFile <- function(questionnaire, noOutput = F)
 # Process at the SubFile level
 processSubfile <- function(questionnaire, subfile, data, premap, noOutput)
 {
-  print(paste("Starting subfile", subfile,data,premap))
+  print(paste("Starting subfile", subfile))
   # Add the SubFile level to the ontology
   if (!noOutput)
     ontology <<- push(ontology, subfile)
@@ -66,7 +66,7 @@ processSubfile <- function(questionnaire, subfile, data, premap, noOutput)
 
     ontology <<- pop(ontology)
   }
-  print(paste("Starting subfile", subfile,data,premap))
+  print(paste("Starting subfile", subfile))
 
   data2
 }
