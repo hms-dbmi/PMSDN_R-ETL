@@ -27,10 +27,8 @@ processFile <- function(questionnaire, noOutput = F)
 
   # Process each SubFile level (excluding the empty SubFile level->Demographics)
   for (subfile in levels(factor(premap$SubFile, exclude = "")))
-      data2 <- tryCatch({merge(data2, processSubfile(questionnaire, subfile, data, premap, noOutput = noOutput), by = "Patient.ID")},
-        error = function(e) {
-          print(data2["Patient.ID"])
-        })
+      data2 <- merge(data2, processSubfile(questionnaire, subfile, data, premap, noOutput = noOutput), by = "Patient.ID")},
+
       print("Finished subfile")
 
   if (!noOutput)
