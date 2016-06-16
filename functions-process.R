@@ -27,7 +27,11 @@ processFile <- function(questionnaire, noOutput = F)
 
   # Process each SubFile level (excluding the empty SubFile level->Demographics)
   for (subfile in levels(factor(premap$SubFile, exclude = "")))
-      data2 <- merge(data2, processSubfile(questionnaire, subfile, data, premap, noOutput = noOutput), by = "Patient.ID")
+      data2 <- tryCatch({merge(data2, processSubfile(questionnaire, subfile, data, premap, noOutput = noOutput), by = "Patient.ID")},
+        error = function(e) {
+          write.table(data2,file = paste(subfile,data["Patient.ID"],"_error.log"),row.names = F, sep = "\t", quote = F, na = ""), 
+          print(MergeError)
+        })
       print("Finished subfile")
 
   if (!noOutput)
@@ -65,7 +69,7 @@ processSubfile <- function(questionnaire, subfile, data, premap, noOutput)
 
     ontology <<- pop(ontology)
   }
-  print(paste("Starting subfile", subfile))
+  print(paste("Finishing subfile", subfile))
 
   data2
 }
