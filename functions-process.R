@@ -30,7 +30,6 @@ processFile <- function(questionnaire, noOutput = F)
       print(paste("Processing ", subfile))
       data2 <- merge(data2, processSubfile(questionnaire, subfile, data, premap, noOutput = noOutput), by = "Patient.ID")
       print("Finished subfile")
-    )
 
   if (!noOutput)
     ontology <<- pop(ontology)
