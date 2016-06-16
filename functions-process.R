@@ -20,7 +20,7 @@ processFile <- function(questionnaire, noOutput = F)
 
   print(paste("processing premap for ", questionnaire))
   premap <- tryCatch({read.csv(paste0("premap", questionnaire, ".csv"), stringsAsFactors = F, colClasses = "character")}, 
-    error = function(e) {print(paste("error reading csv to premap: ", e)},
+    error = function(e) {print(paste("error reading csv to premap: ", e))},
     finally = {print("Finished premap")}
     )
   premap$ColNum <- as.integer(premap$ColNum)
