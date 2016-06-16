@@ -11,10 +11,10 @@ processFile <- function(questionnaire, noOutput = F)
     ontology <<- push(ontology, questionnaire)
 
   # Read the data and premapping files
-  data <- tryCatch({read.csv.2header(paste0("data", questionnaire, ".csv"))}, error = function(e) { print("error reading csv to data: "  + e)}
+  data <- tryCatch({read.csv.2header(paste0("data", questionnaire, ".csv"))}, error = function(e) { print("error reading csv to data: "  + e)})
   data <- data[data$Survey.Session.ID != "", ]
 
-  premap <- tryCatch({read.csv(paste0("premap", questionnaire, ".csv"), stringsAsFactors = F, colClasses = "character")}, error = function(e) {print("error reading csv to premap: " + e)}
+  premap <- tryCatch({read.csv(paste0("premap", questionnaire, ".csv"), stringsAsFactors = F, colClasses = "character")}, error = function(e) {print("error reading csv to premap: " + e)})
   premap$ColNum <- as.integer(premap$ColNum)
 
   data2 <- data["Patient.ID"] %>% distinct()
@@ -22,7 +22,7 @@ processFile <- function(questionnaire, noOutput = F)
   # Process each SubFile level (excluding the empty SubFile level->Demographics)
   for (subfile in levels(factor(premap$SubFile, exclude = "")))
     data2 <- tryCatch({merge(data2, processSubfile(questionnaire, subfile, data, premap, noOutput = noOutput), by = "Patient.ID")}, 
-      error = function(e) {print("error merging subfiles level: " + subfile + " " + e)}
+      error = function(e) {print("error merging subfiles level: " + subfile + " " + e)})
 
   if (!noOutput)
     ontology <<- pop(ontology)
