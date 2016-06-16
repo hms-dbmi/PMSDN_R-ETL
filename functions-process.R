@@ -30,7 +30,7 @@ processFile <- function(questionnaire, noOutput = F)
       data2 <- tryCatch({merge(data2, processSubfile(questionnaire, subfile, data, premap, noOutput = noOutput), by = "Patient.ID")
         },
         error = function(e){
-          dump(data2, file=paste0(subfile,"dump.asc"))
+          dump(data2, file="dump.asc")
         }
   )
   if (!noOutput)
