@@ -27,7 +27,7 @@ processFile <- function(questionnaire, noOutput = F)
 
   # Process each SubFile level (excluding the empty SubFile level->Demographics)
   for (subfile in levels(factor(premap$SubFile, exclude = "")))
-      print(paste("Processing ", subfile)
+      print(paste("Processing ", subfile))
       data2 <- merge(data2, processSubfile(questionnaire, subfile, data, premap, noOutput = noOutput), by = "Patient.ID")
       print("Finished subfile")
     )
