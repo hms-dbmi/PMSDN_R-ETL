@@ -6,24 +6,26 @@ R scripts to load and clean PMSIR raw data files.
 This diagram is an overview of the process. On the left are the data manipulated by each steps. On the right are the R scripts called for each step.  
 Each step is detailed after the diagram.
 
-![](Data integration pipeline.png)
+![](Docs/Data integration pipeline.png)
 
 Step 0
 ------
 
 Get the files from PMSIR.  
-Three input files are obtained from the registry:
+Four input files are obtained from the registry:
 
-* Clinical Questionnaire + Genetic test results
+* Clinical Questionnaire
 * Developmental Questionnaire
 * Adolescent and Adults Questionnaire
+* Genetic test results
 
-These three files are HTML tables in .xls files. **Do not open these files with excel !**
+These four files are HTML tables in .xls files. **Do not open these files with excel !**
 
 They must first be renamed as following:
-* dataClinical.xls for the Clinical&Genetic Questionnaire
+* dataClinical.xls for the Clinical Questionnaire
 * dataDevelopmental.xls for the Developmental Questionnaire
 * dataAdult.xls for the Adolescent and Adults Questionnaire
+* dataGenetic.xls for the Genetic test results
 
 and placed in the scripts folder.
 The scripts need the dplyr, tidyr and lubridate R packages that you can install with this command:
@@ -37,15 +39,16 @@ Step 1
 The files must be converted to the csv format.  
 This is done using the first script: *01_prepare_files.sh*  
 This script calls the *01_prepare.R* R script.  
-Three new files are created:
+Four new files are created:
 * dataClinical.csv
 * dataDevelopmental.csv
 * dataAdult.csv
+* dataGenetic.csv
 
 These files are **UTF-8 encoded**, **comma (,) separated**, with **pipes (|) as quotes** to delimit text fields.  
 You can check the csv files by opening them in LibreOffice (excel doesn't accept pipes as text delimiters)
 
-![](libreoffice.png)
+![](Docs/libreoffice.png)
 
 Step 1 - Manual alternative
 ---------------------------
@@ -60,11 +63,11 @@ The files must first be prepended with the following lines so that Excel/LibreOf
 ```
 Open the files in a text editor, add these 4 lines at the beginning of the file and save it.  
 Open the files in Excel/LibreOffice.  
-The files contain the entirety of the data two times (headers included) that have to be removed.  
 Save the files to the csv format (US type: separator is a comma (,), blocks of text surrounded by pipes (|)) using the following naming convention:  
-* dataClinical.csv for the Clinical&Genetic Questionnaire
+* dataClinical.csv for the Clinical Questionnaire
 * dataDevelopmental.csv for the Developmental Questionnaire
 * dataAdult.csv for the Adolescent and Adults Questionnaire
+* dataGenetic.csv for the Genetic test results
 
 Step 2
 ------
@@ -99,19 +102,19 @@ Download or update the files and tools used to process the genetic data.
 The *04_opt_download_files.sh* script calls the *04_opt_download_files.R* R script which in turn uses a function from the *functions-genes.R* script.  
 This downloads the following files:
 * **liftOver**
-	+ the liftOver tool itself
-	+ hg17ToHg19.over.chain.gz : mapping file from Human Genome Assembly Hg17 to Hg19
-	+ hg18ToHg38.over.chain.gz : mapping file from Human Genome Assembly Hg18 to Hg38
-	+ hg19ToHg38.over.chain.gz : mapping file from Human Genome Assembly Hg19 to Hg38
+  + the liftOver tool itself
+  + hg17ToHg19.over.chain.gz : mapping file from Human Genome Assembly Hg17 to Hg19
+  + hg18ToHg38.over.chain.gz : mapping file from Human Genome Assembly Hg18 to Hg38
+  + hg19ToHg38.over.chain.gz : mapping file from Human Genome Assembly Hg19 to Hg38
 * **RefGene**
-	+ refGene.txt.hg17 : gene references for Human Genome Assembly Hg17
-	+ refGene.txt.hg18 : gene references for Human Genome Assembly Hg18
-	+ refGene.txt.hg19 : gene references for Human Genome Assembly Hg19
-	+ refGene.txt.hg38 : gene references for Human Genome Assembly Hg38
+  + refGene.txt.hg17 : gene references for Human Genome Assembly Hg17
+  + refGene.txt.hg18 : gene references for Human Genome Assembly Hg18
+  + refGene.txt.hg19 : gene references for Human Genome Assembly Hg19
+  + refGene.txt.hg38 : gene references for Human Genome Assembly Hg38
 * **KEGG**
-	+ KEGG_genes.txt : KEGG Genes list
-	+ KEGG_pathways.txt : KEGG Pathways list
-	+ KEGG_link_genes_pathways.txt : KEGG relations between genes and pathways
+  + KEGG_genes.txt : KEGG Genes list
+  + KEGG_pathways.txt : KEGG Pathways list
+  + KEGG_link_genes_pathways.txt : KEGG relations between genes and pathways
 
 The liftOver tool is used to convert chromosome coordinates to the latest Human Genome Assembly (GRCh38/hg38):  
 * hg17 -> hg19 -> hg38
@@ -153,23 +156,23 @@ The premapping files define:
 
 The structure of the ontology tree in i2b2/tranSMART is as follows:
 * Questionnaire
-	+ SubFile
-		+ First header
-			+ Second header
+  + SubFile
+    + First header
+      + Second header
 
 For example:
 * Clinical
-	+ Ears - Hearing
-		+ Has the patient had any of the following hearing tests?
-			+ Behavioral audiometry
-			+ Tympanogram
-		+ Has the patient had ear tubes
-	+ Mouth - Dental
-		+ Has the patient ever ground his or her teeth?
-			+ Yes, during the day
-			+ Yes, during the night
-			+ No
-			+ Unsure
+  + Ears - Hearing
+    + Has the patient had any of the following hearing tests?
+      + Behavioral audiometry
+      + Tympanogram
+    + Has the patient had ear tubes
+  + Mouth - Dental
+    + Has the patient ever ground his or her teeth?
+      + Yes, during the day
+      + Yes, during the night
+      + No
+      + Unsure
 
 The structure of the file is as follows:
 
@@ -220,7 +223,7 @@ Step 2 prepares the genetic information from the dataGenetic.csv file to the dat
 First, dates are harmonized to be compared, and variable names are cleaned.  
 Output variables are created and automatically populated as best as possible using the current curated fields, and reordered for ease of manual editing.  
 
-Non informative test results are censored (Karyotypes, too imprecise, "No result provided", and results without a human genome browser build). Also, only verified results by the genetic consultant are kept.  
+Non informative test results are censored (Karyotypes, too imprecise, "No result provided", FISH. Also, only verified results by the genetic consultant are kept.  
 Of these relevant and reviewed informations, only the most up-to-date test result is kept.
 
 These first steps create the *dataGenetics.csv* file which is far from perfect and needs manual reviewing.  
@@ -238,6 +241,7 @@ mutation | >T | BRCA2 | 2134 | 2134 | unknown
 
 In the prepared *dataGenetics.csv* file, N=4 sets of these columns are present. If needed you can add as many sets, suffixing them with ascending numbers.  
 The genetic information automatically present in these columns should be reviewed for typos, errors and missing information. The genetic information can be looked for in the Comments, Std.Nomenclature, Position.Start.Max, Position.End.Max columns which can be used to validate and/or complete the information already available.  
+In the Std.Nomenclature column, ranges in begginning with "ish" where Test.Method contains "FISH" are FISH results and should not be used.
 
 All the genetic information on one line should be expressed using the same human genome browser build. The [online liftOver tool](http://genome.ucsc.edu/cgi-bin/hgLiftOver) can be used to translate coordinates from one build to the other.  
 Mutations don't need a browser build.  
