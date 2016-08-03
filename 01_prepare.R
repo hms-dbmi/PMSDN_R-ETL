@@ -1,7 +1,7 @@
-html2csv <- function(filename)
+html2csv <- function(filename, encoding = "UTF-8")
 {
   # Open file as raw UTF-8 text
-  file <- file(paste0(filename,".xls"), encoding = "UTF-8")
+  file <- file(paste0(filename,".xls"), encoding = encoding)
   html <- readLines(file)
   close(file)
 
@@ -62,6 +62,6 @@ html2csv <- function(filename)
   cat(html,file = paste0(filename, ".csv"))
 }
 
-html2csv("dataClinical")
-html2csv("dataDevelopmental")
+html2csv("dataClinical", "latin1")
+html2csv("dataDevelopmental", "latin1")
 html2csv("dataAdult")
