@@ -8,7 +8,7 @@ html2csv <- function(filename, encoding = "UTF-8")
   # Concatenate all lines and preserve newlines
   html <- paste(html,sep = "", collapse = "\n")
 
-  # Keep only one sample of the data (it appears twice in the file)
+  # Keep only the contents of the table
   html <-  sub(".*?<table border=0>(.*?)</table>.*", "\\1",  html)
 
   # Process th's with colspan attribute (first header row)
@@ -65,3 +65,4 @@ html2csv <- function(filename, encoding = "UTF-8")
 html2csv("dataClinical", "latin1")
 html2csv("dataDevelopmental", "latin1")
 html2csv("dataAdult")
+html2csv("dataGenetic")
