@@ -112,7 +112,7 @@ processHead1 <- function(head1, data, premap)
   }
   else
     data <- historical(data)
-  
+
   # Clean the content of tabs and linefeeds
   for (var in names(data))
     data[var] <- gsub("[\n\t]", " ", data[[var]])
@@ -196,27 +196,27 @@ processGenetics <- function(noOutput = F)
                               Parental.Origin)
       Genetics_misc$Comments <- gsub("[\n\t]", " ", Genetics_misc$Comments)
       Genetics_misc$Std.Nomenclature <- gsub("[\n\t]", " ", Genetics_misc$Std.Nomenclature)
-  
+
       write.table(Genetics_misc, file = paste0("output/", "Genetics-Misc.txt"), row.names = F, sep = "\t", quote = F, na = "")
       addMappings("Genetics", "Misc", ontology, Genetics_misc)
     ontology <<- pop(ontology)
   }
-    
+
   # ==== "Alterations" genetic data ====
   if (!noOutput)
     ontology <<- push(ontology, "Chromosomal alterations")
-  
+
   # Reshape the data frame to prepare it for the coordinates conversion
   varying = grep("\\d$", names(Genetics), value = T)
   Genetics <- reshape(Genetics, direction = "long", varying = varying, sep = ".", idvar = "Patient.ID", timevar = "Test.nb") %>%
     arrange(Patient.ID, Test.nb) %>%
     filter(!is.na(Gain_Loss))
-  
+
   Genetics_ranges   <- processRanges(Genetics)
-  
+
   # Keep only GRCh38/hg38 deletion ranges
   Genetics_ranges <- filter(Genetics_ranges, Genome.Browser.Build == "GRCh38/hg38") %>% select(-Genome.Browser.Build)
-  
+
   if (noOutput)
   {
     return(Genetics_ranges)
@@ -225,7 +225,7 @@ processGenetics <- function(noOutput = F)
   {
     # Reshape the table in the wide format
     Genetics_ranges <- group_by(Genetics_ranges, Patient.ID, Chr_Gene) %>% mutate(N = row_number()) %>% ungroup() %>% ungroup()
-    
+
     data2 <- distinct(Genetics_ranges[c("Patient.ID", "Result.type")])
     for (chr in unique(Genetics_ranges$Chr_Gene))
     {
@@ -237,11 +237,11 @@ processGenetics <- function(noOutput = F)
         data2 <- merge(data2, select(ranges2, -N), by = "Patient.ID", all = T)
       }
     }
-    
+
     write.table(data2, file = paste0("output/","Genetics-Ranges.txt"), row.names = F, sep = "\t", quote = F, na = "")
     addMappings("Genetics","Ranges",ontology,data2)
     ontology <<- pop(ontology)
-  
+
     ontology <<- pop(ontology)
   }
 }
