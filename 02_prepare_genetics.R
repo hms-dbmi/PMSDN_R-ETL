@@ -56,7 +56,7 @@ read.csv.2header("dataGenetic.csv") %>%
 names(Genetics) <- gsub("/", ".", names(Genetics))
 
 # Correct test dates in the 20th century
-Genetics$Test.Date[which(Genetics$Test.Date > now())] <- Genetics$Test.Date[which(Genetics$Test.Date > now())] - years(100)
+Genetics$Test.Date[which(Genetics$Test.Date > as.Date(now()))] <- Genetics$Test.Date[which(Genetics$Test.Date > as.Date(now()))] - years(100)
 
 # Sort by patient and date
 Genetics <- arrange(Genetics, Patient.ID, Test.Date)
