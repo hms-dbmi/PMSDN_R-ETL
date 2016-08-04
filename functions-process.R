@@ -134,9 +134,9 @@ processDemographics <- function(noOutput = F)
   clinical      <- clinical[clinical$Survey.Session.ID != "", ]
 
   # Extract basic demographic informations (patient ID, SEX, AGE, RACE, COUNTRY)
-  adult[                    c("Patient.ID", "Birthdate", "Gender", "Ancestral.Background", "Country")] %>%
-    bind_rows(clinical[     c("Patient.ID", "Birthdate", "Gender", "Ancestral.Background", "Country")]) %>%
-    bind_rows(developmental[c("Patient.ID", "Birthdate", "Gender", "Ancestral.Background", "Country")]) %>%
+  adult[                    c("Patient.ID", "Birthdate", "Gender", "Race", "Country")] %>%
+    bind_rows(clinical[     c("Patient.ID", "Birthdate", "Gender", "Race", "Country")]) %>%
+    bind_rows(developmental[c("Patient.ID", "Birthdate", "Gender", "Race", "Country")]) %>%
     unique() %>%
     arrange(Patient.ID) %>%
     group_by(Patient.ID) %>%
