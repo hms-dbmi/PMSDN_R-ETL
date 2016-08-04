@@ -81,9 +81,13 @@ cleanHeader2 <- function(header2)
   header2 <- gsub("^Responses$",                       "",    header2, perl = T)
   header2 <- gsub(" - APGAR score$",                   "",    header2, perl = T)
   header2 <- gsub(" - Frequency$",                     "",    header2, perl = T)
-  header2 <- gsub("([^\\d]) - Age( at milestones?)?$", "\\1", header2, perl = T)
-  header2 <- gsub(" - ",                               "_",   header2, perl = T)
+  header2 <- gsub("([^\\d])\\.Age( at milestones?)?$",    "\\1",     header2, perl = T)
+  header2 <- gsub("\\?[[:space:]]*\\.",                   "?_",      header2, perl = T)
   header2 <- gsub("\"",                                "",    header2, perl = T)
+  header2 <- gsub("(\\(during the day\\))\\.",            "\\1_",    header2, perl = T)
+  header2 <- gsub("(\\(out of any type of vessel\\))\\.", "\\1_",    header2, perl = T)
+  header2 <- gsub("(\\d)\\.(\\w)",                        "\\1_\\2", header2, perl = T)
+  header2 <- gsub("\\.(Symptoms|Age at Symptoms|Status)","_\\1", header2, perl = T)
 
   header2
 }
