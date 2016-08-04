@@ -11,16 +11,14 @@ processFile <- function(questionnaire, noOutput = F)
     ontology <<- push(ontology, questionnaire)
 
   # Read the data and premapping files
-  print(paste("processing data for ", questionnaire))
   data <- read.csv.2header(paste0("data", questionnaire, ".csv"))
-    print("Finished parsing data")
+
+  cat(paste0("└┬ Questionnaire : ", questionnaire, "\n"))
 
   data <- data[data$Survey.Session.ID != "", ]
 
-  print(paste("processing premap for ", questionnaire))
   premap <- read.csv(paste0("premap", questionnaire, ".csv"), stringsAsFactors = F, colClasses = "character")
-      print("Finished premap")
-    
+
   premap$ColNum <- as.integer(premap$ColNum)
 
   data2 <- data["Patient.ID"] %>% distinct()
@@ -38,7 +36,7 @@ processFile <- function(questionnaire, noOutput = F)
 # Process at the SubFile level
 processSubfile <- function(questionnaire, subfile, data, premap, noOutput)
 {
-  print(paste("Starting subfile", subfile))
+  cat(paste0(" └┬ Subfile : ", subfile, "\n"))
   # Add the SubFile level to the ontology
   if (!noOutput)
     ontology <<- push(ontology, subfile)
@@ -63,7 +61,6 @@ processSubfile <- function(questionnaire, subfile, data, premap, noOutput)
 
     ontology <<- pop(ontology)
   }
-  print(paste("Finishing subfile", subfile))
 
   data2
 }
@@ -71,6 +68,7 @@ processSubfile <- function(questionnaire, subfile, data, premap, noOutput)
 # Process at the Head1 level
 processHead1 <- function(head1, data, premap)
 {
+  cat(paste0("  ├─ Header 1 : ", head1, "\n"))
   # Subset the premapping file with only the current Head1
   premap <- filter(premap, Head1 == head1)
 
@@ -88,20 +86,30 @@ processHead1 <- function(head1, data, premap)
   if (any(premap$Reformat != ""))
   {
     funcname <- levels(factor(premap$Reformat, exclude = ""))
+    cat(paste0("  │             + executing function ", funcname, "\n"))
     eval(parse(text = paste0("data <- ", funcname, "(data, premap)")))
   }
 
   # Manage 'Other Value' columns
   if (any(grepl("_Other.Value$", names(data))))
+  {
+    cat("  │             + replacing Other.Value\n")
     data <- otherValue(data)
+  }
 
   # Manage "checkbox" items
   if (any(grepl("_Unsure$", names(data))))
+  {
+    cat("  │             + processing checkboxes\n")
     data <- checkboxes(data)
+  }
 
   # Manage longitudinal data
   if (any(premap$Evo == "1"))
+  {
+    cat("  │             + processing evolutive data\n")
     data <- evolutive(data)
+  }
   else
     data <- historical(data)
   
