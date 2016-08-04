@@ -27,12 +27,7 @@ processFile <- function(questionnaire, noOutput = F)
 
   # Process each SubFile level (excluding the empty SubFile level->Demographics)
   for (subfile in levels(factor(premap$SubFile, exclude = "")))
-      data2 <- tryCatch({merge(data2, processSubfile(questionnaire, subfile, data, premap, noOutput = noOutput), by = "Patient.ID")
-        },
-        error = function(e){
-          print(e)
-        }
-  )
+      data2 <- merge(data2, processSubfile(questionnaire, subfile, data, premap, noOutput = noOutput), by = "Patient.ID")
   if (!noOutput)
     ontology <<- pop(ontology)
 
@@ -43,7 +38,6 @@ processFile <- function(questionnaire, noOutput = F)
 # Process at the SubFile level
 processSubfile <- function(questionnaire, subfile, data, premap, noOutput)
 {
-tryCatch({
   print(paste("Starting subfile", subfile))
   # Add the SubFile level to the ontology
   if (!noOutput)
@@ -72,9 +66,6 @@ tryCatch({
   print(paste("Finishing subfile", subfile))
 
   data2
-  },
-  error = function(e) print(e)
-  )
 }
 
 # Process at the Head1 level
