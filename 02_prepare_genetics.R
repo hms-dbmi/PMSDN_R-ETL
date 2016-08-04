@@ -3,10 +3,46 @@ require(lubridate)
 library(magrittr)
 
 # Extract the genetic test results fields from the clinical file, only where there are results
-# Parse the dates
-clinical <- read.csv.2header("dataClinical.csv")
-clinical[c(1,5,22:70)] %>%
+read.csv.2header("dataGenetic.csv") %>%
+  select(Patient.ID,
+         Test.Date,
+         Genetic.Status,
+         Genomic.Position.Start.Min,
+         Genomic.Position.End.Min,
+         Genomic.Position.Start.Max,
+         Genomic.Position.End.Max,
+         Participant.Origin,
+         Comments,
+         Std.Nomenclature,
+         Test.Method,
+         Genome.Browser.Build,
+         Gene,
+         Lab,
+         Category,
+         Test.Verification,
+         `Results.Verified.-.Consultant`,
+         Karyotype.Start,
+         Karyotype.End,
+         Array.Version,
+         Array.Confirmation.Studies,
+         `Start.Exon/Intron`:Parental.Origin,
+         `Other.Gain/Loss.1`,
+         `Other.Arm.Gain/Loss.1`,
+         Other.Position.Start.1,
+         Other.Position.End.1,
+         Origin.1,
+         `Other.Gain/Loss.2`,
+         `Other.Arm.Gain/Loss.2`,
+         Other.Position.Start.2,
+         Other.Position.End.2,
+         Origin.2,
+         `Other.Gain/Loss.3`,
+         `Other.Arm.Gain/Loss.3`,
+         Other.Position.Start.3,
+         Other.Position.End.3,
+         Origin.3) %>%
   filter(Genetic.Status != "No Results Received") %>%
+# Parse the dates
   mutate(Test.Date = gsub("/", "-",                      Test.Date, perl = T)) %>%
   mutate(Test.Date = gsub("^(\\d)-", "0\\1-",            Test.Date, perl = T)) %>%
   mutate(Test.Date = gsub("-(\\d)-", "-0\\1-",           Test.Date, perl = T)) %>%
