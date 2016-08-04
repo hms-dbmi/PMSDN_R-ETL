@@ -12,6 +12,8 @@ html2csv <- function(filename, encoding = "UTF-8")
   html <-  sub(".*?<table border=0>(.*?)</table>.*", "\\1",  html)
 
   # Process th's with colspan attribute (first header row)
+  # m is the regexp object matching th's with colspan attribute
+  # nb is the number of colspan extracted from the regexp
   while (length(grep("<th.*?colspan=(\\d+).*?>.*?</th>", html)) > 0)
   {
     m <- regexpr("[[:space:]]*<th.*?colspan=(\\d+).*?>[[:space:]]*(.*?)[[:space:]]*</th>[[:space:]]*(?s)", html, perl = T)
@@ -26,37 +28,37 @@ html2csv <- function(filename, encoding = "UTF-8")
   html <- gsub("[[:space:]]*</?th.*?>[[:space:]]*(?s)",                '|',   html, perl = T)
 
   # Process body of the table
-  html <- gsub("[[:space:]]*</td>[[:space:]]*<td.*?>[[:space:]]*", '|,|', html)
-  html <- gsub("[[:space:]]*</?td.*?>[[:space:]]*",                '|',   html)
+  html <- gsub("[[:space:]]*</td>[[:space:]]*<td.*?>[[:space:]]*",     '|,|', html)
+  html <- gsub("[[:space:]]*</?td.*?>[[:space:]]*",                    '|',   html)
 
   # Create the correct newlines
-  html <- gsub("[[:space:]]*<tr.*?>[[:space:]]*",                  "",    html)
-  html <- gsub("[[:space:]]*</tr>[[:space:]]*",                    "\n",  html)
+  html <- gsub("[[:space:]]*<tr.*?>[[:space:]]*",                      "",    html)
+  html <- gsub("[[:space:]]*</tr>[[:space:]]*",                        "\n",  html)
 
   # Get rid of other tags
-  html <- gsub("<.*?>",                                            "",    html)
+  html <- gsub("<.*?>",                                                "",    html)
 
   # Unescape quotes
-  html <- gsub('\\\\+',                                            '',    html)
+  html <- gsub('\\\\+',                                                '',    html)
 
   # Get rid of trailing commas
-  html <- gsub(',\n',                                              '\n',  html, perl = T)
+  html <- gsub(',\n',                                                  '\n',  html, perl = T)
 
   # Replace &reg; with ®
-  html <- gsub('&reg;',                                            '®',   html)
-  
+  html <- gsub('&reg;',                                                '®',   html)
+
   # Replace no-break spaces with normal spaces
-  html <- gsub(' ',                                               ' ', html)
+  html <- gsub(' ',                                                    ' ',   html)
 
   # Get rid of multiple spaces
-  html <- gsub(' +',                                     ' ',   html)
-  
+  html <- gsub(' +',                                                   ' ',   html)
+
   # Get rid of trailing whitespaces
-  html <- gsub(' +\\|',                                    '|',   html)
-  html <- gsub('\\| +',                                            '|',   html)
-  
+  html <- gsub(' +\\|',                                                '|',   html)
+  html <- gsub('\\| +',                                                '|',   html)
+
   # Delete empty fields
-  html <- gsub("\\|\\|",                                           "",   html)
+  html <- gsub("\\|\\|",                                               "",    html)
 
   # Write final csv file
   cat(html,file = paste0(filename, ".csv"))

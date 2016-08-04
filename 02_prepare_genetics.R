@@ -1,5 +1,5 @@
 source("functions-loading.R")
-require(lubridate)
+library(lubridate)
 library(magrittr)
 
 # Extract the genetic test results fields from the clinical file, only where there are results
@@ -59,8 +59,8 @@ names(Genetics) <- gsub("/", ".", names(Genetics))
 Genetics$Test.Date[which(Genetics$Test.Date > as.Date(now()))] <- Genetics$Test.Date[which(Genetics$Test.Date > as.Date(now()))] - years(100)
 
 # Sort by patient and date
-Genetics <- arrange(Genetics, Patient.ID, Test.Date)
-
+Genetics %<>%
+  arrange(Patient.ID, Test.Date) %>%
 # Create new variables with defaults and reorder the columns
   mutate(Result.type = "coordinates",
          Gain_Loss.1 = "Loss",
@@ -132,7 +132,9 @@ Genetics %<>%
          Test.Method != "Karyotype/FISH",
          Test.Method != "FISH") %>%
 # Keep only the latest informative test results
-Genetics <- group_by(Genetics, Patient.ID) %>% filter(Test.Date == last(Test.Date)) %>% ungroup
+  group_by(Patient.ID) %>%
+  filter(Test.Date == last(Test.Date)) %>%
+  ungroup
 
 # Small corrections
 Genetics$Chr_Gene.2 <- gsub("[pq]$", "", Genetics$Chr_Gene.2)

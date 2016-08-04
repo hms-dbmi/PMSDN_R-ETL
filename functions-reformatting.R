@@ -7,12 +7,14 @@ anchorFilter <- function(premap,data)
   # Find the index of the first variable by name in the data file
   idx1 <- premap$ColNum[1] #premap's index of the variable
   idx2 <- which(names(data) == premap$Header[1]) #data's index of the variable
+
   # Throw a warning if variable not found in the data
   if (length(idx2) == 0)
   {
     warning("Variable not found: \"", premap$Header[1], "\" in data file at ontology level \"", paste(ontology, collapse = "+"), "\"")
     return()
   }
+
   # If real homonyms at first position of head1, use an heuristic (pick the nearest one in position)
   if (length(idx2) > 1)
     idx2 <- idx2[order(abs(idx2 - idx1))[1]]
@@ -32,8 +34,10 @@ refactor <- function(data, premap)
 
   # new vars prefix
   varPre <- levels(factor(unlist(data[premap$Header[premap$Reformat == "refactor"]]), exclude = c("")))
+
   # new vars suffix
   varSuff <- levels(factor(premap$VarName[premap$Linked != ""]))
+
   # Create new vars after transform
   for (pre in varPre)
     for (suff in varSuff)
