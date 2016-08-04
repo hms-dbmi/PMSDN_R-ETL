@@ -86,12 +86,12 @@ processHead1 <- function(head1, data, premap)
   # Anchor-based filtering of variables from the data file
   data <- anchorFilter(premap, data)
 
-  # Sort by Survey Date
-  data$Survey.Date <- as.numeric(strptime(data$Survey.Date, format = "%Y-%m-%d %H:%M:%S"))
-  data <- arrange(data, Patient.ID, Survey.Date)
+  # Sort by Survey.Time
+  data$Survey.Time <- as.numeric(strptime(data$Survey.Time, format = "%Y-%m-%d %H:%M:%S"))
+  data <- arrange(data, Patient.ID, Survey.Time)
 
   # Delete records made less than 24 hours before the next
-  data <- filter(data, (lead(Survey.Date) - Survey.Date) > 24 * 3600 | lead(Patient.ID) != Patient.ID | Patient.ID == max(Patient.ID))
+  data <- filter(data, (lead(Survey.Time) - Survey.Time) > 24 * 3600 | lead(Patient.ID) != Patient.ID | Patient.ID == max(Patient.ID))
 
  # Reformatting needed. Execute the function given in the premap file for the reformatting
   if (any(premap$Reformat != ""))

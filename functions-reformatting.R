@@ -21,14 +21,14 @@ anchorFilter <- function(premap,data)
   premap <- mutate(premap, ColNum = ColNum + (idx2 - idx1))
 
   # Filter columns in data based on the updated index
-  data[c(which(names(data) %in% c("Patient.ID", "Survey.Date", "Birthdate")), premap$ColNum)]
+  data[c(which(names(data) %in% c("Patient.ID", "Survey.Time", "Birthdate")), premap$ColNum)]
 }
 
 # Reformat function to refactor spread pieces of data
 refactor <- function(data, premap)
 {
   # Create new data frame to contain transformed/curated data
-  data2 <- select(data, Patient.ID, Survey.Date, Birthdate)
+  data2 <- select(data, Patient.ID, Survey.Time, Birthdate)
 
   # new vars prefix
   varPre <- levels(factor(unlist(data[premap$Header[premap$Reformat == "refactor"]]), exclude = c("")))
@@ -148,7 +148,7 @@ weight <- function(data, premap)
     "200 + lbs",     "91 kg or more"),ncol = 2, byrow = T)
 
   # Create new data frame to contain transformed/curated data
-  data2 <- select(data, Patient.ID, Survey.Date, Birthdate)
+  data2 <- select(data, Patient.ID, Survey.Time, Birthdate)
 
   # Create new var
   varname <- unique(premap$Head1)
@@ -169,7 +169,7 @@ height <- function(data, premap)
   conv_inch <- 2.54
 
   # Create new data frame to contain transformed/curated data
-  data2 <- select(data, Patient.ID, Survey.Date, Birthdate)
+  data2 <- select(data, Patient.ID, Survey.Time, Birthdate)
 
   # Create new var
   varname <- unique(premap$Head1)
@@ -277,7 +277,7 @@ head_circum <- function(data, premap)
     "30 inches + inches",  "76.20 +"), ncol = 2, byrow = T)
 
   # Create new data frame to contain transformed/curated data
-  data2 <- select(data, Patient.ID, Survey.Date, Birthdate)
+  data2 <- select(data, Patient.ID, Survey.Time, Birthdate)
 
   # Create new var
   varname <- unique(premap$Head1)
@@ -315,7 +315,7 @@ weight_neo <- function(data, premap)
     "More than 12 lbs",	"More than 5.44 kg"), ncol = 2, byrow = T)
 
   # Create new data frame to contain transformed/curated data
-  data2 <- select(data, Patient.ID, Survey.Date, Birthdate)
+  data2 <- select(data, Patient.ID, Survey.Time, Birthdate)
 
   # Create new var
   varname <- unique(premap$Head1)
@@ -400,7 +400,7 @@ height_neo <- function(data, premap)
     "Greater than 25.75 inches", "Greater than 65.41 centimeters"), ncol = 2, byrow = T)
 
   # Create new data frame to contain transformed/curated data
-  data2 <- select(data, Patient.ID, Survey.Date, Birthdate)
+  data2 <- select(data, Patient.ID, Survey.Time, Birthdate)
 
   for (link in premap$Linked)
   {
@@ -433,7 +433,7 @@ otherValue <- function(data)
     colOther <- grep("_Other$", names(data))
     data[data[colOther] == "1", colOther] <- data[data[colOther] == "1", colOtherValue]
   }
-  else if (length(data) == 5) # When there are only two columns (+3 for Patient.ID,Survey.Date,Birthdate)
+  else if (length(data) == 5) # When there are only two columns (+3 for Patient.ID,Survey.Time,Birthdate)
   {
     colOther <- grep("_Other.Value", names(data[-(1:3)]), invert = T) + 3
     data[data[colOther] == "Other", colOther] <- data[data[colOther] == "Other", colOtherValue]
@@ -489,15 +489,15 @@ checkboxes <- function(data)
 evolutive <- function(data)
 {
   data$Birthdate <- as.numeric(strptime(data$Birthdate, format = "%Y-%m-%d"))
-  data <- mutate(data, Age = as.integer((Survey.Date - Birthdate) / (365.25 * 24 * 3600))) %>%
+  data <- mutate(data, Age = as.integer((Survey.Time - Birthdate) / (365.25 * 24 * 3600))) %>%
     group_by(Patient.ID, Age) %>%
-    filter(Survey.Date == last(Survey.Date)) %>%
+    filter(Survey.Time == last(Survey.Time)) %>%
     ungroup
 
   data2 <- data %>%
     group_by(Patient.ID) %>%
-    filter(Survey.Date == last(Survey.Date)) %>%
-    select(-Age, -Survey.Date, -Birthdate) %>%
+    filter(Survey.Time == last(Survey.Time)) %>%
+    select(-Age, -Survey.Time, -Birthdate) %>%
     ungroup
   varnames <- names(data2)
   varnames[-1] <- paste0(varnames[-1], "_ currently")
@@ -522,7 +522,7 @@ historical <- function(data)
 {
   data %>%
     group_by(Patient.ID) %>%
-    filter(Survey.Date == last(Survey.Date)) %>%
-    select(-Survey.Date, -Birthdate) %>%
+    filter(Survey.Time == last(Survey.Time)) %>%
+    select(-Survey.Time, -Birthdate) %>%
     ungroup
 }

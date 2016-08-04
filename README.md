@@ -195,8 +195,8 @@ new_reformat_fn <- function(data, premap)
   # exactly as-is. But here I show how to use relevant information from the two passed objects
 
   # Create new data frame to contain transformed/curated data
-  # This object must always contain the three variables Patient.ID, Survey.Date and Birthdate
-  data2 <- select(data, Patient.ID, Survey.Date, Birthdate)
+  # This object must always contain the three variables Patient.ID, Survey.Time and Birthdate
+  data2 <- select(data, Patient.ID, Survey.Time, Birthdate)
 
   # Create the variables in the output object, here with the same names as
   # originally, which can be found in the premap object
