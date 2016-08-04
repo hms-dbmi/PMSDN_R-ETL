@@ -126,8 +126,11 @@ Genetics <- arrange(Genetics, Patient.ID, Test.Date)
          Start.Exon.Intron:Parental.Origin)
 
 # Delete non-informative test results
-Genetics <- filter(Genetics, Test.Method != "Karyotype" & Test.Method != "No result provided" & Test.Method != "" & Genetic.Status == "Results Verified" & (Genome.Browser.Build != "" | (Test.Method == "Sequence Analysis" | Test.Method == "Bi-Directional Sequence Analysis" | Test.Method == "Whole exome sequencing" )))
-
+Genetics %<>%
+  filter(Genetic.Status == "Results Verified",
+         Test.Method != "Karyotype",
+         Test.Method != "Karyotype/FISH",
+         Test.Method != "FISH") %>%
 # Keep only the latest informative test results
 Genetics <- group_by(Genetics, Patient.ID) %>% filter(Test.Date == last(Test.Date)) %>% ungroup
 
