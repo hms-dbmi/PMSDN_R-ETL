@@ -66,12 +66,12 @@ Save the files to the csv format (US type: separator is a comma (,), blocks of t
 * dataDevelopmental.csv for the Developmental Questionnaire
 * dataAdult.csv for the Adolescent and Adults Questionnaire
 
-Step 2 (run once)
------------------
+Step 2
+------
 
-The genetic data must be extracted from the dataClinical file.  
-To do so, run the second script: *02_once_extract_genetics.sh*  
-This script calls the *02_once_extract_genetics.R* R script, and creates the *dataGenetic.csv* file.  
+The genetic data need to be prepared first.  
+To do so, run the second script: *02_prepare_genetics.sh*  
+This script calls the *02_prepare_genetics.R* R script, and creates the *dataGenetics.csv* file.  
 This file must be reviewed manually. This process is detailed in a dedicated section of this readme.
 
 Step 3 (optional)
@@ -216,7 +216,7 @@ new_reformat_fn <- function(data, premap)
 Cleaning the genetic results
 ============================
 
-Step 2 extracts genetic information from the clinical file.  
+Step 2 prepares the genetic information from the dataGenetic.csv file to the dataGenetics.csv file.  
 First, dates are harmonized to be compared, and variable names are cleaned.  
 Output variables are created and automatically populated as best as possible using the current curated fields, and reordered for ease of manual editing.  
 
