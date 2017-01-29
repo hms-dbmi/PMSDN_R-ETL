@@ -99,7 +99,7 @@ Genetics %<>%
          Start.1,
          End.1,
          Origin.1,
-         Gain_Loss.1,
+         Gain_Loss.2,
          Chr_Gene.2,
          Start.2,
          End.2,
