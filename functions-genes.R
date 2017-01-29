@@ -5,6 +5,8 @@ processRanges <- function(genetics)
   hg38 <- read.delim("refGene.txt.hg38", stringsAsFactors = F, header = F, col.names = c("bin", "name", "chrom", "strand", "txStart", "txEnd", "cdsStart", "cdsEnd", "exonCount", "exonStarts", "exonEnds", "score", "name2", "cdsStartStat", "cdsEndStat", "exonFrames"))
   # Prepare the data frame to contain only coordinates by transforming gene information and mutation information
   genetics <- select(genetics, Patient.ID, Genome.Browser.Build, Result.type, Gain_Loss, Chr_Gene, Start, End)
+  genetics$Start <- as.numeric(genetics$Start)
+  genetics$End <- as.numeric(genetics$End)
   for (i in 1:nrow(genetics))
   {
     if (genetics$Result.type[i] == "gene")
