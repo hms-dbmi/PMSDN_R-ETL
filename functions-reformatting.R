@@ -452,9 +452,13 @@ checkboxes <- function(data)
   ## Set "_Other" column aside
   if (any(grepl("_Other$", names(data))))
   {
-    colOther <- grep("_Other$", names(data))
+    colOther <- grep("_Other$", names(data), value = T)
     varOther <- data[[colOther]]
-    data[varOther != "", colOther] <- "1"
+    data[colOther] <- NULL
+    other <- T
+  } else
+  {
+    other <- F
   }
 
   ## Create helping columns
@@ -482,8 +486,8 @@ checkboxes <- function(data)
     data[sumData > 0 & sumSpe == 0, col] <- ifelse(data[sumData > 0 & sumSpe == 0, col] == "1", "Yes", "No (by imputation)")
 
   ## Re-fill "Other" columns with its values
-  if (any(grepl("_Other$", names(data))))
-    data[data[colOther] == "Yes", colOther] <- varOther[data[colOther] == "Yes"]
+  if (other)
+    data[colOther] <- varOther
 
   ## Remove special columns
   select(data, -matches("_(Unsure|Not\\.applicable|No(ne.*| intervention)?)$"))
