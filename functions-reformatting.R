@@ -485,9 +485,10 @@ checkboxes <- function(data)
   for (col in colData)
     data[sumData > 0 & sumSpe == 0, col] <- ifelse(data[sumData > 0 & sumSpe == 0, col] == "1", "Yes", "No (by imputation)")
 
+# Uncomment this section to retrieve the "Other" values (might contain identifiable data !)
   ## Re-fill "Other" columns with its values
-  if (other)
-    data[colOther] <- varOther
+  # if (other)
+  #   data[colOther] <- varOther
 
   ## Remove special columns
   select(data, -matches("_(Unsure|Not\\.applicable|No(ne.*| intervention)?)$"))
