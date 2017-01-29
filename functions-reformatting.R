@@ -104,7 +104,7 @@ refactor <- function(data, premap)
 
   ## Fill accessory columns with N/A when No/Unsure
   for (col in setdiff(varPre,c("No","Unsure")))
-    data2[grepl("No|Unsure", data2[[paste(col, suff, sep = "_")]]), paste(col, setdiff(varSuff, suff), sep = "_")] <- "Not applicable"
+    data2[grepl("No|Unsure", data2[[paste(col, suff, sep = "_")]]), paste(col, setdiff(varSuff, suff), sep = "_")] <- NA
 
   # Rename variables correctly
   varnames <- names(data2)
