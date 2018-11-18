@@ -215,7 +215,7 @@ liftOver <- function(genetics)
   genetics <- rbind(genetics, data)
   genetics <- arrange(genetics, rowname)
 
-  unlink(c("bed*","out*","unmap*"))
+  # unlink(c("bed*","out*","unmap*"))
 
   select(genetics, -rowname)
 }
