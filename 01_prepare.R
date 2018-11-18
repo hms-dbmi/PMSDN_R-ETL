@@ -64,7 +64,7 @@ html2csv <- function(filename, encoding = "UTF-8")
   cat(html,file = paste0(filename, ".csv"))
 }
 
-html2csv("dataClinical", "latin1")
-html2csv("dataDevelopmental", "latin1")
+html2csv("dataClinical")
+html2csv("dataDevelopmental")
 html2csv("dataAdult")
-html2csv("dataGenetic")
+# html2csv("dataGenetic")
