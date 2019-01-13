@@ -68,3 +68,9 @@ html2csv("dataClinical")
 html2csv("dataDevelopmental")
 html2csv("dataAdult")
 # html2csv("dataGenetic")
+
+library(tidyverse)
+library(readxl)
+
+read_xlsx("dataGenetic.xlsx") %>%
+  write_csv("dataGenetic.csv")
