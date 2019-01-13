@@ -3,10 +3,13 @@ README
 
 R scripts to load and clean PMSIR raw data files.
 
+This repo uses `packrat` for R libraries dependancies management to ensure reproductibility of execution. After cloning, launching R within the repo should auto-start the installation of R libraries dependancies in the **packrat** subdir of the repo.  
+**If this step does not start automatically,** run `packrat::restore()` to manually download all dependancies.
+
 This diagram is an overview of the process. On the left are the data manipulated by each steps. On the right are the R scripts called for each step.  
 Each step is detailed after the diagram.
 
-![](Docs/Data integration pipeline.png)
+![](Docs/Data\ integration\ pipeline.png)
 
 Step 0
 ------
