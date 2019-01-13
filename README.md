@@ -9,7 +9,7 @@ This repo uses `packrat` for R libraries dependancies management to ensure repro
 This diagram is an overview of the process. On the left are the data manipulated by each steps. On the right are the R scripts called for each step.  
 Each step is detailed after the diagram.
 
-![](Docs/Data\ integration\ pipeline.png)
+![](Docs/Data_integration_pipeline.png)
 
 Step 0
 ------
