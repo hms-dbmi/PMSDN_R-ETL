@@ -1,8 +1,9 @@
-source("functions-loading.R")
+# source("functions-loading.R")
+library(tidyverse)
 library(lubridate)
 
 # Extract the genetic test results fields from the clinical file, only where there are results
-read.csv.2header("dataGenetic.csv") %>%
+read.csv("dataGenetic.csv") %>%
   select(Patient.ID,
          Test.Date,
          Genetic.Status,
