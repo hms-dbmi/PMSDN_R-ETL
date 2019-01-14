@@ -1,6 +1,6 @@
 source("functions-process.R")
 
-export_date = as.Date("2016-08-01")
+export_date = as.Date("2018-11-18")
 
 # Create dir for output, create empty mapping file and ontology object
 dir.create("output", recursive = T)
