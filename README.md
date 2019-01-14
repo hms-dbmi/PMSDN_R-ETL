@@ -3,8 +3,8 @@ README
 
 R scripts to load and clean PMSIR raw data files.
 
-This repo uses `packrat` for R libraries dependancies management to ensure reproductibility of execution. After cloning, launching R within the repo should auto-start the installation of R libraries dependancies in the **packrat** subdir of the repo.  
-**If this step does not start automatically,** run `packrat::restore()` to manually download all dependancies.
+This repo uses `packrat` for R libraries dependencies management to ensure reproducibility of execution. After cloning, launching R within the repo should auto-start the installation of R libraries dependencies in the **packrat** subdir of the repo.  
+**If this step does not start automatically,** run `packrat::restore()` to manually download all dependencies.
 
 This diagram is an overview of the process. On the left are the data manipulated by each steps. On the right are the R scripts called for each step.  
 Each step is detailed after the diagram.
@@ -22,19 +22,26 @@ Four input files are obtained from the registry:
 * Adolescent and Adults Questionnaire
 * Genetic test results
 
-These four files are HTML tables in .xls files. **Do not open these files with excel !**
+The three first files are HTML tables in .xls files. **Do not open these files with excel !**
 
 They must first be renamed as following:
 * dataClinical.xls for the Clinical Questionnaire
 * dataDevelopmental.xls for the Developmental Questionnaire
 * dataAdult.xls for the Adolescent and Adults Questionnaire
-* dataGenetic.xls for the Genetic test results
+* dataGenetic.xlxs for the Genetic test results
 
 and placed in the scripts folder.
-The scripts need the dplyr, tidyr and lubridate R packages that you can install with this command:
-```R
-install.packages(c("dplyr","tidyr","lubridate"))
-```
+
+Optionally run *00_opt_download_files.sh* to download the necessary files to run `liftOver`:
+  + the `liftOver` tool itself
+  + hg17ToHg19.over.chain.gz : mapping file from Human Genome Assembly Hg17 to Hg19
+  + hg18ToHg38.over.chain.gz : mapping file from Human Genome Assembly Hg18 to Hg38
+  + hg19ToHg38.over.chain.gz : mapping file from Human Genome Assembly Hg19 to Hg38
+
+The `liftOver` tool is used to convert chromosome coordinates to the latest Human Genome Assembly (GRCh38/hg38):  
+* hg17 -> hg19 -> hg38
+* hg18 -> hg38
+Some coordinates still cannot be converted, so the result is a mix of different human genome assemblies, with the fewest not up to date as possible.
 
 Step 1
 ------
@@ -49,7 +56,8 @@ Four new files are created:
 * dataGenetic.csv
 
 These files are **UTF-8 encoded**, **comma (,) separated**, with **pipes (|) as quotes** to delimit text fields.  
-You can check the csv files by opening them in LibreOffice (excel doesn't accept pipes as text delimiters)
+You can check the csv files by opening them in LibreOffice (excel doesn't accept pipes as text delimiters)  
+This format keeps the double header format from the registry, which can be used to regenerate premapping files in a later optional step.
 
 ![](Docs/libreoffice.png)
 
@@ -72,20 +80,12 @@ Save the files to the csv format (US type: separator is a comma (,), blocks of t
 * dataAdult.csv for the Adolescent and Adults Questionnaire
 * dataGenetic.csv for the Genetic test results
 
-Step 2
-------
-
-The genetic data need to be prepared first.  
-To do so, run the second script: *02_prepare_genetics.sh*  
-This script calls the *02_prepare_genetics.R* R script, and creates the *dataGenetics.csv* file.  
-This file must be reviewed manually. This process is detailed in a dedicated section of this readme.
-
-Step 3 (optional)
+Step 2 (optional)
 -----------------
 
 Regenerate the premapping files.  
-The *03_opt_create_premap_files.sh* script uses the data files to generate the empty premapping files.  
-This script calls the *03_opt_create_premap_files.R* R script, which in turn uses functions from the *functions-loading.R* script.  
+The *02_opt_create_premap_files.sh* script uses the data files to generate the empty premapping files.  
+This script calls the *02_opt_create_premap_files.R* R script, which in turn uses functions from the *functions-loading.R* script.  
 The script creates three premapping files, one for each data file:
 * premapClinical.csv
 * premapDevelopmental.csv
@@ -98,22 +98,18 @@ In case the registry changes (new variables, renamed variables, etc.), the prema
 They then have to be completed again, mainly using the previous ones as a template.  
 A more in-depth manual on how to use the premapping files and add processing code to the scripts can be found in a dedicated section of this readme.
 
-Step 4 (optional)
------------------
+Step 3
+------
 
-Download or update the files and tools used to process the genetic data.
-The *04_opt_download_files.sh* script calls the *04_opt_download_files.R* R script which in turn uses a function from the *functions-genes.R* script.  
-This downloads the following files:
-* **liftOver**
-  + the liftOver tool itself
-  + hg17ToHg19.over.chain.gz : mapping file from Human Genome Assembly Hg17 to Hg19
-  + hg18ToHg38.over.chain.gz : mapping file from Human Genome Assembly Hg18 to Hg38
-  + hg19ToHg38.over.chain.gz : mapping file from Human Genome Assembly Hg19 to Hg38
+Some entries are duplicated, or test accounts.  
+This step deletes true duplicated lines, lines from the test accounts, and merges the identity of the duplicated accounts.
+It then saves the files as regular CSV files with a single header row.
 
-The liftOver tool is used to convert chromosome coordinates to the latest Human Genome Assembly (GRCh38/hg38):  
-* hg17 -> hg19 -> hg38
-* hg18 -> hg38
-Some coordinates still cannot be converted, so the result is a mix of different human genome assemblies, with the fewest not up to date as possible.
+Step 4
+------
+
+TODO
+
 
 Step 5
 ------
@@ -204,6 +200,9 @@ new_reformat_fn <- function(data, premap)
 }
 ```
 ***
+
+||||||| TO REWRITE |||||||
+vvvvvvv            vvvvvvv
 
 Cleaning the genetic results
 ============================
