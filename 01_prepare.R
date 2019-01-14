@@ -1,3 +1,5 @@
+library(readxl)
+
 html2csv <- function(filename, encoding = "UTF-8")
 {
   # Open file as raw UTF-8 text
@@ -67,10 +69,6 @@ html2csv <- function(filename, encoding = "UTF-8")
 html2csv("dataClinical")
 html2csv("dataDevelopmental")
 html2csv("dataAdult")
-# html2csv("dataGenetic")
-
-library(tidyverse)
-library(readxl)
 
 read_xlsx("dataGenetic.xlsx") %>%
   write_csv("dataGenetic.csv")

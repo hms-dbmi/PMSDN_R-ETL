@@ -1,6 +1,5 @@
 source("functions-loading.R")
 library(lubridate)
-library(magrittr)
 
 # Extract the genetic test results fields from the clinical file, only where there are results
 read.csv.2header("dataGenetic.csv") %>%
@@ -59,7 +58,7 @@ names(Genetics) <- gsub("/", ".", names(Genetics))
 Genetics$Test.Date[which(Genetics$Test.Date > as.Date(now()))] <- Genetics$Test.Date[which(Genetics$Test.Date > as.Date(now()))] - years(100)
 
 # Sort by patient and date
-Genetics %<>%
+Genetics %>%
   arrange(Patient.ID, Test.Date) %>%
 # Create new variables with defaults and reorder the columns
   mutate(Result.type = "coordinates",
@@ -123,10 +122,10 @@ Genetics %<>%
          Karyotype.End,
          Array.Version,
          Array.Confirmation.Studies,
-         Start.Exon.Intron:Parental.Origin)
+         Start.Exon.Intron:Parental.Origin) -> Genetics
 
 # Delete non-informative test results
-Genetics %<>%
+Genetics %>%
   filter(Genetic.Status == "Results Verified",
          Test.Method != "Karyotype",
          Test.Method != "Karyotype/FISH",
@@ -134,7 +133,7 @@ Genetics %<>%
 # Keep only the latest informative test results
   group_by(Patient.ID) %>%
   filter(Test.Date == last(Test.Date)) %>%
-  ungroup
+  ungroup -> Genetics
 
 # Small corrections
 Genetics$Chr_Gene.2 <- gsub("[pq]$", "", Genetics$Chr_Gene.2)
@@ -145,7 +144,7 @@ Genetics$Result.type[Genetics$Test.Method == "Bi-Directional Sequence Analysis" 
 # Select out irrelevant variables
 Genetics <- select(Genetics, -Genetic.Status)
 
-Genetics %<>%
-  mutate(Test.Date = format(Genetics$Test.Date, format = "%m/%d/%y %I:%M %p"))
+Genetics %>%
+  mutate(Test.Date = format(Genetics$Test.Date, format = "%m/%d/%y %I:%M %p")) -> Genetics
 
 write.csv(Genetics, "dataGenetics.csv", na = "", row.names = F)

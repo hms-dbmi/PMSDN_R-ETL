@@ -109,25 +109,11 @@ This downloads the following files:
   + hg17ToHg19.over.chain.gz : mapping file from Human Genome Assembly Hg17 to Hg19
   + hg18ToHg38.over.chain.gz : mapping file from Human Genome Assembly Hg18 to Hg38
   + hg19ToHg38.over.chain.gz : mapping file from Human Genome Assembly Hg19 to Hg38
-* **RefGene**
-  + refGene.txt.hg17 : gene references for Human Genome Assembly Hg17
-  + refGene.txt.hg18 : gene references for Human Genome Assembly Hg18
-  + refGene.txt.hg19 : gene references for Human Genome Assembly Hg19
-  + refGene.txt.hg38 : gene references for Human Genome Assembly Hg38
-* **KEGG**
-  + KEGG_genes.txt : KEGG Genes list
-  + KEGG_pathways.txt : KEGG Pathways list
-  + KEGG_link_genes_pathways.txt : KEGG relations between genes and pathways
 
 The liftOver tool is used to convert chromosome coordinates to the latest Human Genome Assembly (GRCh38/hg38):  
 * hg17 -> hg19 -> hg38
 * hg18 -> hg38
 Some coordinates still cannot be converted, so the result is a mix of different human genome assemblies, with the fewest not up to date as possible.
-
-The RefGene files are used to extract the name of the genes affected by the deletions.  
-Because some coordinates cannot be converted to the latest genome assembly, the refGene files for all assemblies are downloaded.
-
-The KEGG files are used to extract the pathway annotations for each gene.
 
 Step 5
 ------
