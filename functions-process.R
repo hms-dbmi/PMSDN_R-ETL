@@ -11,7 +11,7 @@ processFile <- function(questionnaire, noOutput = F)
     ontology <<- push(ontology, questionnaire)
 
   # Read the data and premapping files
-  data <- read.csv.2header(paste0("data", questionnaire, ".csv"))
+  data <- read.csv(paste0("data", questionnaire, ".csv"), colClasses = "character", stringsAsFactors = F, check.names = F)
 
   cat(paste0("└┬ Questionnaire : ", questionnaire, "\n"))
 
@@ -124,9 +124,9 @@ processHead1 <- function(head1, data, premap)
 processDemographics <- function(noOutput = F)
 {
   # Read raw data files
-  adult         <- read.csv.2header("dataAdult.csv")
-  developmental <- read.csv.2header("dataDevelopmental.csv")
-  clinical      <- read.csv.2header("dataClinical.csv")
+  adult         <- read.csv("dataAdult.csv", colClasses = "character", check.names = F, stringsAsFactors = F, na.strings = "")
+  developmental <- read.csv("dataDevelopmental.csv", colClasses = "character", check.names = F, stringsAsFactors = F, na.strings = "")
+  clinical      <- read.csv("dataClinical.csv", colClasses = "character", check.names = F, stringsAsFactors = F, na.strings = "")
 
   # Delete rows with no Survey Session ID
   adult         <- adult[adult$Survey.Session.ID != "", ]
