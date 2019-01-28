@@ -17,6 +17,10 @@ str_c("data", files, ".csv") %>%
   setNames(files) -> data
 
 # Load duplicates and test ids
+# The duplicates and tests file is a CSV file with three columns:
+# - type : either "test" for test account, or "dup" for duplicated accounts"
+# - id1 : id for a test account, or old id for duplicated account
+# - id2 : new id for duplicated account
 read_csv("duplicates_and_tests.csv", col_types = "ccc") %>%
   split(.$type) -> dups_tests
 
