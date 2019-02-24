@@ -35,9 +35,9 @@ data %>%
   map(~ .x[!.x$Patient.ID %in% dups_tests$test$id1,]) -> data
 
 # Remove duplicated patients
-# Comparing all the inputs from all files for all the duplicated pairs, the rows of id2 are more filled, so this is probably the id in use.
+# Comparing all the inputs from all files for all the duplicated pairs, the rows corresponding to id2 contain more data, so this is probably the id in use.
 # Let's merge IDs to a common one and let the parsing script delete rows without survey session ids, and choose naturally the most recent data.
-# ids are still important for the linkage with the genetic data, so we need to keep the same than in the genetic files.
+# ids are still important to create the link with the genetic data, so we need to keep the same as in the genetic files.
 # However, at the moment there is none!!! (except for 2923-3504, labelled as such. So for now I'll use id2 as it is the most recent
 # TODO: check the ids in the genetic results file for one of the duplicates
 
