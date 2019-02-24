@@ -1,6 +1,6 @@
-library(tidyverse)
+source("functions-loading.R")
 
-files <- c("Adult", "Clinical", "Developmental", "Genetic")
+files <- c("Adult", "Clinical", "Developmental")
 
 # Read special CSV and write it back as normal CSV
 str_c("data", files, ".csv") %>%
@@ -10,6 +10,8 @@ str_c("data", files, ".csv") %>%
 data %>%
   names %>%
   walk(~write_csv(data[[.]], str_c("data", ., ".csv")))
+
+files <- c("Adult", "Clinical", "Developmental", "Genetic")
 
 # Load all files
 str_c("data", files, ".csv") %>%
