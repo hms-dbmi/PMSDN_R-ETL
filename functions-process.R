@@ -158,78 +158,49 @@ processGenetics <- function()
   ontology <<- push(ontology, "Genetic")
 
   # Read the curated genetic data
-  Genetics <- read.csv("dataGenetics.csv", stringsAsFactors = F, na.strings = "")
+  genetic <- read.csv("dataGenetic.csv", stringsAsFactors = F, na.strings = "NA")
 
-  # ==== "Misc" genetic data ====
-  if (!noOutput)
-  {
-    ontology <<- push(ontology, "Misc")
-      Genetics_misc <- select(Genetics,
-                              Patient.ID,
-                              Test.Date,
-                              Comments,
-                              Std.Nomenclature,
-                              Test.Method,
-                              Gene,
-                              Lab,
-                              Category,
-                              Test.Verification,
-                              Results.Verified...Consultant,
-                              Karyotype.Start,
-                              Karyotype.End,
-                              Array.Version,
-                              Array.Confirmation.Studies,
-                              Parental.Results,
-                              Parental.Test.Method,
-                              Parental.Origin)
-      Genetics_misc$Comments <- gsub("[\n\t]", " ", Genetics_misc$Comments)
-      Genetics_misc$Std.Nomenclature <- gsub("[\n\t]", " ", Genetics_misc$Std.Nomenclature)
+  # ==== Overall genetic testing status ====
+  genetic %>%
+    select(Patient.ID,
+           GeneticStatus,
+           SHANK3Involved,
+           PathogenicSHANK3Defect,
+           Mosaicism,
+           Origin,
+           TestVerification) -> geneticStatus
 
-      write.table(Genetics_misc, file = paste0("output/", "Genetics-Misc.txt"), row.names = F, sep = "\t", quote = F, na = "")
-      addMappings("Genetics", "Misc", ontology, Genetics_misc)
-    ontology <<- pop(ontology)
-  }
+  write.table(geneticStatus, file = paste0("output_transmart/", "Genetics-Status.txt"), row.names = F, sep = "\t", quote = F, na = "")
+  addMappings("Genetics", "Overall Status", ontology, geneticStatus)
 
-  # ==== "Alterations" genetic data ====
-  if (!noOutput)
-    ontology <<- push(ontology, "Chromosomal alterations")
+  # Sequencing results
+  genetic %>%
+    filter(Result.type == "Sequencing") %>%
+    select(Patient.ID,
+           # Result.type,
+           SequencingEffect,
+           SequencingClinicalSignificance) %>%
+    set_names(c("Patient.ID", "Sequencing_Effect", "Sequencing_Clinical.Significance")) -> genetic_sequencing
 
-  # Reshape the data frame to prepare it for the coordinates conversion
-  varying = grep("\\d$", names(Genetics), value = T)
-  Genetics <- reshape(Genetics, direction = "long", varying = varying, sep = ".", idvar = "Patient.ID", timevar = "Test.nb") %>%
-    arrange(Patient.ID, Test.nb) %>%
-    filter(!is.na(Gain_Loss))
+  # Array results
+  genetic %>%
+    filter(Result.type == "Array") %>%
+    select(Patient.ID, starts_with("Array")) %>%
+    reshape(direction = "wide",
+            idvar = "Patient.ID",
+            timevar = "Array.num",
+            sep = "_") %>%
+    set_names(~str_replace(., "\\.", "_") %>%
+              str_replace("(\\w+)_([\\w.]+)_(\\d)", "\\1_\\3_\\2")) %>%
+    rename(Patient.ID = Patient_ID) -> genetic_array
 
-  Genetics_ranges   <- processRanges(Genetics)
+  genetic_sequencing %>%
+    full_join(genetic_array) -> genetics
 
-  # Keep only GRCh38/hg38 deletion ranges
-  Genetics_ranges <- filter(Genetics_ranges, Genome.Browser.Build == "GRCh38/hg38") %>% select(-Genome.Browser.Build)
 
-  if (noOutput)
-  {
-    return(Genetics_ranges)
-  }
-  else
-  {
-    # Reshape the table in the wide format
-    Genetics_ranges <- group_by(Genetics_ranges, Patient.ID, Chr_Gene) %>% mutate(N = row_number()) %>% ungroup() %>% ungroup()
+  write.table(genetics, file = paste0("output_transmart/","Genetics-Results.txt"), row.names = F, sep = "\t", quote = F, na = "")
+  addMappings("Genetics","Results",ontology,genetics)
+  ontology <<- pop(ontology)
 
-    data2 <- distinct(Genetics_ranges[c("Patient.ID", "Result.type")])
-    for (chr in unique(Genetics_ranges$Chr_Gene))
-    {
-      ranges <- filter(Genetics_ranges, Chr_Gene == chr) %>% select(-Chr_Gene, -Result.type)
-      for (n in unique(ranges$N))
-      {
-        ranges2 <- filter(ranges, N == n)
-        names(ranges2) <- c("Patient.ID", paste0("Chr", chr, "_", n,"_",c("Gain/Loss","Start","End")), "N")
-        data2 <- merge(data2, select(ranges2, -N), by = "Patient.ID", all = T)
-      }
-    }
-
-    write.table(data2, file = paste0("output/","Genetics-Ranges.txt"), row.names = F, sep = "\t", quote = F, na = "")
-    addMappings("Genetics","Ranges",ontology,data2)
-    ontology <<- pop(ontology)
-
-    ontology <<- pop(ontology)
-  }
+  genetic
 }
