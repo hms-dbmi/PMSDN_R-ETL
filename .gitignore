@@ -6,5 +6,5 @@ liftOver
 *.txt.hg*
 packrat/lib*/
 packrat/src*/
-output/
+output_*/
 Data/
