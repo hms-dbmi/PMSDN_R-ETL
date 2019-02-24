@@ -11,6 +11,8 @@ Each step is detailed after the diagram.
 
 ![](Docs/Data_integration_pipeline.png)
 
+_Note: this diagram contains outdated information_
+
 Step 0
 ------
 
@@ -55,30 +57,13 @@ Four new files are created:
 * dataAdult.csv
 * dataGenetic.csv
 
-These files are **UTF-8 encoded**, **comma (,) separated**, with **pipes (|) as quotes** to delimit text fields.  
+Please read the source file as it contains specific information about the current raw data files we obtained.
+
+All but the dataGenetic file are **UTF-8 encoded**, **comma (,) separated**, with **pipes (|) as quotes** to delimit text fields.  
 You can check the csv files by opening them in LibreOffice (excel doesn't accept pipes as text delimiters)  
 This format keeps the double header format from the registry, which can be used to regenerate premapping files in a later optional step.
 
 ![](Docs/libreoffice.png)
-
-Step 1 - Manual alternative
----------------------------
-
-**In case step 1 fails**, it can still be done manually using the following procedure:  
-The files must first be prepended with the following lines so that Excel/LibreOffice registers the correct encoding:
-```html
-<html>
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-</head>
-```
-Open the files in a text editor, add these 4 lines at the beginning of the file and save it.  
-Open the files in Excel/LibreOffice.  
-Save the files to the csv format (US type: separator is a comma (,), blocks of text surrounded by pipes (|)) using the following naming convention:  
-* dataClinical.csv for the Clinical Questionnaire
-* dataDevelopmental.csv for the Developmental Questionnaire
-* dataAdult.csv for the Adolescent and Adults Questionnaire
-* dataGenetic.csv for the Genetic test results
 
 Step 2 (optional)
 -----------------
@@ -92,7 +77,7 @@ The script creates three premapping files, one for each data file:
 * premapAdult.csv
 
 The premapping files are used to tell how to process each variable and where to put it in the ontology.  
-Already filled in premapping files are on the repo and will work as long as the structure of the registry doesn't change.  
+Already filled-in premapping files are on the repo and will work as long as the structure of the registry doesn't change.  
 In case there are modifications to make to the processing, these premapping files can be amended.  
 In case the registry changes (new variables, renamed variables, etc.), the premapping files can be generated again from scratch.
 They then have to be completed again, mainly using the previous ones as a template.  
@@ -105,24 +90,43 @@ Some entries are duplicated, or test accounts.
 This step deletes true duplicated lines, lines from the test accounts, and merges the identity of the duplicated accounts.
 It then saves the files as regular CSV files with a single header row.
 
+The duplicated and tests accounts must be given as a `duplicates_and_tests.csv` csv file, with the following structure:
+
+| type | id1                         | id2                          |
+|------|-----------------------------|------------------------------|
+| test | _id of the test account_    |                              |
+| dup  | _id of the first duplicate_ | _id of the second duplicate_ |
+
+Some caveat apply when choosing which id to put in the **id1** and **id2** columns. **id2** should be the id in use in the genetics file, and/or the one with the most recent phenotypic data.
+
 Step 4
 ------
 
-TODO
+Prepare the genetics file.  
+This step applies specific preparation for the genetics file:
+
+- selecting relevant variables
+- excluding variables containing potentially identifiable data
+- pre-cleaning variables (factor levels management, etc.)
+- reshaping the data for use in analysis and integration in transmart (one row per unique genetic results, multiple rows for each patient with multiple results)
+
+Genetic data at this point is still in the original presentation.
 
 
 Step 5
 ------
 
-Use the prepared files, the premapping files and the external tools to clean the data and enrich the genetic test results.  
+Each file is processed, generating outputs for analysis and for integration into transmart.
 The *05_clean_data.sh* scripts calls the *05_clean_data.R* R script, which in turn uses functions from:
 * *functions-loading.R* to load the data and premapping files
 * *functions-process.R* to process each level of depth of the data
 * *functions-mapping.R* to generate the Kettle mapping file
 * *functions-reformatting.R* to reformat and clean variables according to the rules in the premapping files
-* *functions-genes.R* to enrich the genetic information
+* *functions-genes.R* to process genetic data (data files and mapping file)
 
-This final script creates the *output/* directory containing the cleaned data files (one for each section of each questionnaire) and the Kettle mapping file.
+This final script creates two directories:
+- `output_human/` directory containing data files usable for analysis
+- `output_transmart/` directory containing the cleaned data files (one for each section of each questionnaire) and the Kettle mapping file for integration into transmart.
 
 The files **[Cleaning data overview.pdf](Docs/Cleaning data overview.pdf)** and **[PMSIR Data Management Algorithm Detailed.pdf](Docs/PMSIR Data Management Algorithm Detailed.pdf)** illustrate how this step works internally.  
 The source files (*.svg) for these diagrams are provided.
@@ -200,47 +204,3 @@ new_reformat_fn <- function(data, premap)
 }
 ```
 ***
-
-||||||| TO REWRITE |||||||
-vvvvvvv            vvvvvvv
-
-Cleaning the genetic results
-============================
-
-Step 2 prepares the genetic information from the dataGenetic.csv file to the dataGenetics.csv file.  
-First, dates are harmonized to be compared, and variable names are cleaned.  
-Output variables are created and automatically populated as best as possible using the current curated fields, and reordered for ease of manual editing.  
-
-Non informative test results are censored (Karyotypes, too imprecise, "No result provided", FISH. Also, only verified results by the genetic consultant are kept.  
-Of these relevant and reviewed informations, only the most up-to-date test result is kept.
-
-These first steps create the *dataGenetics.csv* file which is far from perfect and needs manual reviewing.  
-The file should contain only one line per patient, so if a patient appears on two lines (two reports on the same day), the information on the two lines must be merged and conflicts resolved. This can also work as a validation step for typos. (see patient 2541 for example).  
-The genetic information relevant for analyses must appear in the following columns:
-
-Result.type | Gain_Loss.N | Chr_Gene.N | Start.N | End.N | Origin.N
------------ | ----------- | ---------- | ------- | ----- | --------
-The way all the N results are expressed | What is the defect | On which gene or chromosome is the defect | Start position | End position | Origin of the defect
-coordinates | Gain | 22 | 49123456 | 49691432 | de novo
-coordinates | Loss | 1 | 249123456 | 249250621 | maternally transmitted
-mutation | del | SHANK3 | 4576 | 4586 | de novo
-mutation | dup | SHANK3 | 3525 | 3527 | unknown
-mutation | >T | BRCA2 | 2134 | 2134 | unknown
-
-In the prepared *dataGenetics.csv* file, N=4 sets of these columns are present. If needed you can add as many sets, suffixing them with ascending numbers.  
-The genetic information automatically present in these columns should be reviewed for typos, errors and missing information. The genetic information can be looked for in the Comments, Std.Nomenclature, Position.Start.Max, Position.End.Max columns which can be used to validate and/or complete the information already available.  
-In the Std.Nomenclature column, ranges in begginning with "ish" where Test.Method contains "FISH" are FISH results and should not be used.
-
-All the genetic information on one line should be expressed using the same human genome browser build. The [online liftOver tool](http://genome.ucsc.edu/cgi-bin/hgLiftOver) can be used to translate coordinates from one build to the other.  
-Mutations don't need a browser build.  
-For missing browser builds (Unknown), the browser can be inferred by looking at the test date and the coordinates ranges for the chromosomes in each build:
-
-Chromosome | hg17 | hg18 | hg19 | hg38
----------- | ---- | ---- | ---- | ----
-1 | 245,522,847 | 247,249,719 | 249,250,621 | 248,956,422
-17 | 78,774,742 | 78,774,742 | 81,195,210 | 83,257,441
-18 | 76,117,153 | 76,117,153 | 78,077,248 | 80,373,285
-22 | 49,554,710 | 49,691,432 | 51,304,566 | 50,818,468
-Year of release | 2004 | 2006 | 2009 | 2013
-
-When in doubt (or impossible to decide), even if hg18 is (at the time of writing) still the most widely used human assembly, leave it as unknown as it is impossible to correctly infer the genome assembly and could lead to misinterpretation.
