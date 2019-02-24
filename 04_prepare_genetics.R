@@ -75,4 +75,5 @@ genetic %>%
               mutate(Result.type = "Sequencing") %>%
               select(-starts_with("Array"), -Sequencing)) -> genetic
 
-write_csv("dataGenetic.csv")
+genetic %>%
+  write_csv("dataGenetic.csv")
