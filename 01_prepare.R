@@ -19,6 +19,7 @@ str_c("data", files) %>%
 #
 # Patient ID 10370 has multiple misplaced cells : Array2_Year, Array2_Lab, Array2_Method, Array2_Version, CodingDNAChange, ProteinChange, and Effect. For now this is censored.
 # (-> get Catalina to fix this in her file)
+# Mark Patient 2679 with an "Incomplete" Test verification, and enquire for the correct data
 
 read_xlsx("dataGenetic.xlsx") %>%
   rename(Patient.ID = ID) %>%
