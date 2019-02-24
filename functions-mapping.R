@@ -36,7 +36,7 @@ addMapping <- function(dataFile, categoryCode, columnNum, dataLabel)
   # spaces for variable names
   dataLabel <- gsub("\\.", " ", dataLabel)
   mapping <- data.frame(Filename = dataFile, Category.Code = categoryCode, Column.Number = columnNum, Data.Label = dataLabel)
-  write.table(mapping, file = "output/mapping.txt", row.names = F, sep = "\t", append = T, col.names = F, quote = F)
+  write.table(mapping, file = "output_transmart/mapping.txt", row.names = F, sep = "\t", append = T, col.names = F, quote = F)
 }
 
 # Simple push mechanism

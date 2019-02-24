@@ -1,14 +1,12 @@
-source("functions-loading.R")
 source("functions-mapping.R")
 source("functions-reformatting.R")
 source("functions-genes.R")
 
 # Process at the file level
-processFile <- function(questionnaire, noOutput = F)
+processFile <- function(questionnaire)
 {
   # Add the questionnaire level to the ontology
-  if (!noOutput)
-    ontology <<- push(ontology, questionnaire)
+  ontology <<- push(ontology, questionnaire)
 
   # Read the data and premapping files
   data <- read.csv(paste0("data", questionnaire, ".csv"), colClasses = "character", stringsAsFactors = F, check.names = F)
@@ -25,22 +23,19 @@ processFile <- function(questionnaire, noOutput = F)
 
   # Process each SubFile level (excluding the empty SubFile level->Demographics)
   for (subfile in levels(factor(premap$SubFile, exclude = "")))
-    data2 <- merge(data2, processSubfile(questionnaire, subfile, data, premap, noOutput = noOutput), by = "Patient.ID")
+    data2 <- merge(data2, processSubfile(questionnaire, subfile, data, premap), by = "Patient.ID")
 
-  if (!noOutput)
-    ontology <<- pop(ontology)
+  ontology <<- pop(ontology)
 
-  if (noOutput)
-    return(data2)
+  data2
 }
 
 # Process at the SubFile level
-processSubfile <- function(questionnaire, subfile, data, premap, noOutput)
+processSubfile <- function(questionnaire, subfile, data, premap)
 {
   cat(paste0(" └┬ Subfile : ", subfile, "\n"))
   # Add the SubFile level to the ontology
-  if (!noOutput)
-    ontology <<- push(ontology, subfile)
+  ontology <<- push(ontology, subfile)
 
   # Subset the premapping file with only the current SubFile
   premap <- filter(premap, SubFile == subfile)
@@ -53,15 +48,12 @@ processSubfile <- function(questionnaire, subfile, data, premap, noOutput)
     data2 <- merge(data2, processHead1(head1, data, premap), by = "Patient.ID")
 
   # Parse resulting var names and write mappings
-  if (!noOutput)
-  {
-    addMappings(questionnaire, subfile, ontology, data2)
+  addMappings(questionnaire, subfile, ontology, data2)
 
-    # Write the $SubFile.txt
-    write.table(data2, file = paste0("output/", questionnaire, "-", subfile, ".txt"), row.names = F, sep = "\t", quote = F, na = "")
+  # Write the $SubFile.txt
+  write.table(data2, file = paste0("output_transmart/", questionnaire, "-", subfile, ".txt"), row.names = F, sep = "\t", quote = F, na = "")
 
-    ontology <<- pop(ontology)
-  }
+  ontology <<- pop(ontology)
 
   data2
 }
@@ -121,7 +113,7 @@ processHead1 <- function(head1, data, premap)
   data
 }
 
-processDemographics <- function(noOutput = F)
+processDemographics <- function()
 {
   # Read raw data files
   adult         <- read.csv("dataAdult.csv", colClasses = "character", check.names = F, stringsAsFactors = F, na.strings = "")
@@ -144,31 +136,26 @@ processDemographics <- function(noOutput = F)
     mutate(Age = as.numeric(export_date - Birthdate) / 365.25) %>%
     mutate(Age_months = Age * 12) -> Demographics
 
-  if (!noOutput)
-  {
-    # Write Demographics.txt
-    write.table(Demographics, "output/Demographics.txt", row.names = F, sep = "\t", quote = F)
+  # Write Demographics.txt
+  write.table(Demographics, "output_transmart/Demographics.txt", row.names = F, sep = "\t", quote = F)
 
-    # Write the mappings
-    ontology <<- push(ontology, "Demographics")
-    addMapping("Demographics.txt", ontology, 1, "SUBJ_ID")
-    addMapping("Demographics.txt", ontology, 2, "BIRTHDATE")
-    addMapping("Demographics.txt", ontology, 3, "SEX")
-    addMapping("Demographics.txt", ontology, 4, "RACE")
-    addMapping("Demographics.txt", ontology, 5, "COUNTRY")
-    addMapping("Demographics.txt", ontology, 6, "AGE_IN_YEARS")
-    addMapping("Demographics.txt", ontology, 7, "AGE")
-    ontology <<- pop(ontology)
-  }
+  # Write the mappings
+  ontology <<- push(ontology, "Demographics")
+  addMapping("Demographics.txt", ontology, 1, "SUBJ_ID")
+  addMapping("Demographics.txt", ontology, 2, "BIRTHDATE")
+  addMapping("Demographics.txt", ontology, 3, "SEX")
+  addMapping("Demographics.txt", ontology, 4, "RACE")
+  addMapping("Demographics.txt", ontology, 5, "COUNTRY")
+  addMapping("Demographics.txt", ontology, 6, "AGE_IN_YEARS")
+  addMapping("Demographics.txt", ontology, 7, "AGE")
+  ontology <<- pop(ontology)
 
-  if (noOutput)
-    return(Demographics)
+  Demographics
 }
 
-processGenetics <- function(noOutput = F)
+processGenetics <- function()
 {
-  if (!noOutput)
-    ontology <<- push(ontology, "Genetic")
+  ontology <<- push(ontology, "Genetic")
 
   # Read the curated genetic data
   Genetics <- read.csv("dataGenetics.csv", stringsAsFactors = F, na.strings = "")
