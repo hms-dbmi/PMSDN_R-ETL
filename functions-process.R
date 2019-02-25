@@ -1,6 +1,5 @@
 source("functions-mapping.R")
 source("functions-reformatting.R")
-source("functions-genes.R")
 
 # Process at the file level
 processFile <- function(questionnaire)
