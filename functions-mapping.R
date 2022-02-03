@@ -46,7 +46,7 @@ push <- function(vector, value)
   vector
 }
 
-# Simple pop mechanism. Does not return the popped value but the modified vector
+## Simple pop mechanism. Does not return the popped value but the modified vector
 pop <- function(vector)
 {
   if (length(vector) == 1)
