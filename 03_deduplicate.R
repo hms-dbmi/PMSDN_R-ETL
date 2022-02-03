@@ -26,9 +26,9 @@ str_c("data", files, ".csv") %>%
 read_csv("duplicates_and_tests.csv", col_types = "ccc") %>%
   split(.$type) -> dups_tests
 
-# Remove exact duplicated rows
-data %>%
-  map(distinct) -> data
+## Remove exact duplicated rows
+#data %>%
+  #map(distinct) -> data
 
 # Remove test patients
 data %>%
