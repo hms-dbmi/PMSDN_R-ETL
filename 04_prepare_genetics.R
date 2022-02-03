@@ -77,3 +77,4 @@ genetic %>%
 
 genetic %>%
   write_csv("dataGenetic.csv")
+
