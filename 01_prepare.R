@@ -25,3 +25,4 @@ read_xlsx("dataGenetic.xlsx") %>%
   rename(Patient.ID = ID) %>%
   filter(!Patient.ID %>% is.na) %>%
   write_csv("dataGenetic.csv")
+
