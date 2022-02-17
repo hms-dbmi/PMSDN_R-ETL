@@ -152,6 +152,14 @@ processDemographics <- function()
   Demographics
 }
 
+# Prepare names for reshaping and transmart mapping
+rename_patient <- function(x)
+{
+  x %>%
+    str_replace(., "_", "\\.") %>% 
+    str_replace("(\\w+)_([\\w.]+)_(\\d)", "\\1_\\3_\\2") 
+}
+
 processGenetics <- function()
 {
   ontology <<- push(ontology, "Genetic")
@@ -181,17 +189,18 @@ processGenetics <- function()
            SequencingClinicalSignificance) %>%
     set_names(c("Patient.ID", "Sequencing_Effect", "Sequencing_Clinical.Significance")) -> genetic_sequencing
 
-  # Array results
+  #Array results
   genetic %>%
     filter(Result.type == "Array") %>%
     select(Patient.ID, starts_with("Array")) %>%
     reshape(direction = "wide",
             idvar = "Patient.ID",
             timevar = "Array.num",
-            sep = "_") %>%
-    set_names(~str_replace(., "\\.", "_") %>%
-              str_replace("(\\w+)_([\\w.]+)_(\\d)", "\\1_\\3_\\2")) %>%
-    rename(Patient.ID = Patient_ID) -> genetic_array
+            sep = "_") -> genetic_temp
+
+  genetic_array_name <- rename_patient(colnames(genetic_temp))
+  genetic_temp %>%
+    set_names(genetic_array_name) -> genetic_array
 
   genetic_sequencing %>%
     full_join(genetic_array) -> genetics
