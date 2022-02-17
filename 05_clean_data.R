@@ -1,7 +1,7 @@
 source("functions-process.R")
 library(tidyverse)
 
-export_date = as.Date("2018-11-18")
+export_date = as.Date("2020-12-30")
 
 # Create dir for output, create empty mapping file and ontology object
 dir.create("output_transmart", recursive = T)
